@@ -69,6 +69,28 @@ const CSS = `
   text-align: right;
   min-height: 14px;
 }
+
+/* ── List view — read-only note preview ──────────────────────────────────── */
+
+.hda-widget--list {
+  display: block;
+  margin-top: 6px;
+}
+
+.hda-widget__preview {
+  background: #fef9c3;
+  border-left: 3px solid #f59e0b;
+  border-radius: 0 4px 4px 0;
+  padding: 4px 8px;
+  margin: 0;
+  font-size: 12px;
+  font-family: system-ui, sans-serif;
+  color: #1c1917;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 56px;
+  overflow: hidden;
+}
 `;
 
 let injected = false;

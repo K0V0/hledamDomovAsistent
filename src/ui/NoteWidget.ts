@@ -3,18 +3,49 @@ import type { PlatformId } from '../domain/Platform';
 import type { NoteRepository } from '../repository/NoteRepository';
 import { injectStyles } from './styles';
 
+export type WidgetMode = 'list' | 'detail';
+
 export class NoteWidget {
   constructor(
     private readonly propertyId: string,
     private readonly platform: PlatformId,
     private readonly repository: NoteRepository,
+    private readonly mode: WidgetMode = 'detail',
   ) {}
 
-  async createElement(): Promise<HTMLElement> {
+  /**
+   * Returns the widget element, or null when the mode is 'list' and no note exists.
+   * Callers must handle null — it means "render nothing for this item".
+   */
+  async createElement(): Promise<HTMLElement | null> {
     injectStyles();
-
     const existing = await this.repository.get(this.propertyId);
 
+    if (this.mode === 'list') {
+      return existing?.text ? this.createListElement(existing.text) : null;
+    }
+
+    return this.createDetailElement(existing);
+  }
+
+  // ── List view — read-only ─────────────────────────────────────────────────
+
+  private createListElement(text: string): HTMLElement {
+    const root = document.createElement('div');
+    root.className = 'hda-widget hda-widget--list';
+    root.dataset['propertyId'] = this.propertyId;
+
+    const preview = document.createElement('p');
+    preview.className = 'hda-widget__preview';
+    preview.textContent = text;
+
+    root.appendChild(preview);
+    return root;
+  }
+
+  // ── Detail view — editable ────────────────────────────────────────────────
+
+  private createDetailElement(existing: Note | null): HTMLElement {
     const root = document.createElement('div');
     root.className = 'hda-widget';
     root.dataset['propertyId'] = this.propertyId;
