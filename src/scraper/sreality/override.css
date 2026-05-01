@@ -1,0 +1,8 @@
+/* sreality.cz — style overrides for hda-widget
+ *
+ * Rules here are appended after the base widget styles and take precedence.
+ * Use this file to fix layout conflicts introduced by the portal's own CSS.
+ *
+ * Example:
+ *   .hda-widget { margin-top: 0; }
+ */

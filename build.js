@@ -10,6 +10,7 @@ const config = {
     'src/background/service-worker.ts',
   ],
   bundle: true,
+  loader: { '.css': 'text' },
   outdir: 'dist',
   outbase: 'src',
   platform: 'browser',

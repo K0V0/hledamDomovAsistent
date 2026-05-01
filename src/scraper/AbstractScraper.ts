@@ -1,6 +1,7 @@
 import type { PlatformId } from '../domain/Platform';
 import type { NoteRepository } from '../repository/NoteRepository';
 import { NoteWidget, type WidgetMode } from '../ui/NoteWidget';
+import { injectStyles } from '../ui/styles';
 import { createLogger, type Logger } from '../utils/Logger';
 
 export abstract class AbstractScraper {
@@ -9,6 +10,9 @@ export abstract class AbstractScraper {
   // Logger context is set to the concrete subclass name (e.g. "SrealityScraper"),
   // so inherited method calls appear as [SrealityScraper > AbstractScraper.method].
   protected readonly log: Logger;
+
+  /** Platform-specific CSS appended after base styles. Set via override.css in each platform directory. */
+  protected readonly platformStyleOverrides: string = '';
 
   constructor(protected readonly repository: NoteRepository) {
     this.log = createLogger(this.constructor.name);
@@ -62,6 +66,7 @@ export abstract class AbstractScraper {
 
   async init(): Promise<void> {
     this.log.info(`starting on ${location.href}`);
+    injectStyles(this.platformStyleOverrides);
     await this.processPage();
     this.observeDOM();
   }

@@ -1,131 +1,19 @@
-const CSS = `
-.hda-widget {
-  display: inline-flex;
-  flex-direction: column;
-  gap: 4px;
-  font-family: system-ui, sans-serif;
-  position: relative;
-  z-index: 9999;
-  margin-top: 6px;
-}
+import widgetCss from './noteWidget.css';
+import colorsCss from './noteColors.css';
 
-.hda-widget__toggle {
-  background: #1a73e8;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 4px 10px;
-  cursor: pointer;
-  font-size: 12px;
-  line-height: 1.5;
-  white-space: nowrap;
-}
-
-.hda-widget__toggle:hover {
-  background: #1557b0;
-}
-
-.hda-widget__toggle--has-note {
-  background: #188038;
-}
-
-.hda-widget__toggle--has-note:hover {
-  background: #0d652d;
-}
-
-.hda-widget__panel {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  background: #fff;
-  border: 1px solid #dadce0;
-  border-radius: 6px;
-  padding: 8px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.18);
-  min-width: 260px;
-}
-
-.hda-widget__textarea {
-  width: 100%;
-  resize: vertical;
-  border: 1px solid #dadce0;
-  border-radius: 4px;
-  padding: 6px 8px;
-  font-size: 13px;
-  font-family: inherit;
-  box-sizing: border-box;
-  min-height: 72px;
-}
-
-.hda-widget__textarea:focus {
-  outline: none;
-  border-color: #1a73e8;
-  box-shadow: 0 0 0 2px rgba(26,115,232,.2);
-}
-
-.hda-widget__status {
-  font-size: 11px;
-  color: #5f6368;
-  text-align: right;
-  min-height: 14px;
-}
-
-/* ── List view — read-only note preview ──────────────────────────────────── */
-
-.hda-widget--list {
-  display: block;
-  margin-top: 6px;
-}
-
-.hda-widget__preview {
-  border-left: 3px solid;
-  border-radius: 0 4px 4px 0;
-  padding: 4px 8px;
-  margin: 0;
-  font-size: 12px;
-  font-family: system-ui, sans-serif;
-  white-space: pre-wrap;
-  word-break: break-word;
-  max-height: 56px;
-  overflow: hidden;
-}
-
-/* ── Detail view — color picker row ─────────────────────────────────────── */
-
-.hda-widget__colors {
-  display: flex;
-  gap: 6px;
-  padding-bottom: 6px;
-  border-bottom: 1px solid #f0f0f0;
-  margin-bottom: 2px;
-}
-
-.hda-widget__color-btn {
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  flex-shrink: 0;
-  transition: transform 0.1s;
-}
-
-.hda-widget__color-btn:hover {
-  transform: scale(1.2);
-}
-
-.hda-widget__color-btn--selected {
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(0,0,0,0.45);
-}
-`;
+const BASE_CSS = widgetCss + '\n' + colorsCss;
 
 let injected = false;
 
-export function injectStyles(): void {
+/**
+ * Inject the base widget styles plus optional platform-specific overrides.
+ * Safe to call multiple times — only the first call has any effect.
+ * Platform overrides are appended after base styles so they take precedence.
+ */
+export function injectStyles(overrides = ''): void {
   if (injected) return;
   const style = document.createElement('style');
-  style.textContent = CSS;
+  style.textContent = overrides ? BASE_CSS + '\n' + overrides : BASE_CSS;
   document.head.appendChild(style);
   injected = true;
 }
