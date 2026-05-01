@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Hledám Domov Asistent",
+  "version": "0.1.0",
+  "description": "Add personal notes to real estate listings on Czech property portals.",
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["*://*.sreality.cz/*"],
+      "js": ["dist/content/sreality.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://*.mmreality.cz/*"],
+      "js": ["dist/content/mmreality.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "background": {
+    "service_worker": "dist/background/service-worker.js"
+  },
+  "icons": {
+    "16": "public/icons/icon16.png",
+    "48": "public/icons/icon48.png",
+    "128": "public/icons/icon128.png"
+  }
+}
