@@ -52,15 +52,14 @@
 
 .hda-widget--list {
   display: block;
-  margin-top: 6px;
 }
 
 .hda-widget__preview {
-  border-left: 3px solid;
+  font-size: 1em;
+  border-left: 0.375em solid;
   border-radius: 0 4px 4px 0;
   padding: 4px 8px;
   margin: 0;
-  font-size: 12px;
   font-family: system-ui, sans-serif;
   white-space: pre-wrap;
   word-break: break-word;
