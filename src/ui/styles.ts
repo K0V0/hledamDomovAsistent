@@ -78,18 +78,45 @@ const CSS = `
 }
 
 .hda-widget__preview {
-  background: #fef9c3;
-  border-left: 3px solid #f59e0b;
+  border-left: 3px solid;
   border-radius: 0 4px 4px 0;
   padding: 4px 8px;
   margin: 0;
   font-size: 12px;
   font-family: system-ui, sans-serif;
-  color: #1c1917;
   white-space: pre-wrap;
   word-break: break-word;
   max-height: 56px;
   overflow: hidden;
+}
+
+/* ── Detail view — color picker row ─────────────────────────────────────── */
+
+.hda-widget__colors {
+  display: flex;
+  gap: 6px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 2px;
+}
+
+.hda-widget__color-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: transform 0.1s;
+}
+
+.hda-widget__color-btn:hover {
+  transform: scale(1.2);
+}
+
+.hda-widget__color-btn--selected {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px rgba(0,0,0,0.45);
 }
 `;
 

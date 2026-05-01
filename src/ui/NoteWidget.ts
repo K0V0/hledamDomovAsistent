@@ -1,6 +1,7 @@
-import type { Note } from '../domain/Note';
+import type { Note, NoteColor } from '../domain/Note';
 import type { PlatformId } from '../domain/Platform';
 import type { NoteRepository } from '../repository/NoteRepository';
+import { DEFAULT_COLOR, NOTE_COLOR_DEFS, NOTE_COLORS } from './noteColors';
 import { injectStyles } from './styles';
 
 export type WidgetMode = 'list' | 'detail';
@@ -14,7 +15,7 @@ export class NoteWidget {
   ) {}
 
   /**
-   * Returns the widget element, or null when the mode is 'list' and no note exists.
+   * Returns the widget element, or null when mode is 'list' and no note exists.
    * Callers must handle null — it means "render nothing for this item".
    */
   async createElement(): Promise<HTMLElement | null> {
@@ -22,7 +23,8 @@ export class NoteWidget {
     const existing = await this.repository.get(this.propertyId);
 
     if (this.mode === 'list') {
-      return existing?.text ? this.createListElement(existing.text) : null;
+      if (!existing?.text) return null;
+      return this.createListElement(existing.text, existing.color ?? DEFAULT_COLOR);
     }
 
     return this.createDetailElement(existing);
@@ -30,7 +32,9 @@ export class NoteWidget {
 
   // ── List view — read-only ─────────────────────────────────────────────────
 
-  private createListElement(text: string): HTMLElement {
+  private createListElement(text: string, color: NoteColor): HTMLElement {
+    const { bg, border, text: textColor } = NOTE_COLOR_DEFS[color];
+
     const root = document.createElement('div');
     root.className = 'hda-widget hda-widget--list';
     root.dataset['propertyId'] = this.propertyId;
@@ -38,6 +42,9 @@ export class NoteWidget {
     const preview = document.createElement('p');
     preview.className = 'hda-widget__preview';
     preview.textContent = text;
+    preview.style.background = bg;
+    preview.style.borderLeftColor = border;
+    preview.style.color = textColor;
 
     root.appendChild(preview);
     return root;
@@ -46,6 +53,8 @@ export class NoteWidget {
   // ── Detail view — editable ────────────────────────────────────────────────
 
   private createDetailElement(existing: Note | null): HTMLElement {
+    let activeColor: NoteColor = existing?.color ?? DEFAULT_COLOR;
+
     const root = document.createElement('div');
     root.className = 'hda-widget';
     root.dataset['propertyId'] = this.propertyId;
@@ -66,7 +75,12 @@ export class NoteWidget {
     const status = document.createElement('span');
     status.className = 'hda-widget__status';
 
-    panel.append(textarea, status);
+    const colorRow = this.createColorRow(activeColor, color => {
+      activeColor = color;
+      this.persistNote(textarea, toggle, status, existing, activeColor);
+    });
+
+    panel.append(colorRow, textarea, status);
     root.append(toggle, panel);
 
     toggle.addEventListener('click', () => {
@@ -80,7 +94,7 @@ export class NoteWidget {
       status.textContent = 'Saving...';
       if (saveTimer) clearTimeout(saveTimer);
       saveTimer = setTimeout(
-        () => this.persist(textarea, toggle, status, existing),
+        () => this.persistNote(textarea, toggle, status, existing, activeColor),
         800,
       );
     });
@@ -88,11 +102,45 @@ export class NoteWidget {
     return root;
   }
 
-  private async persist(
+  private createColorRow(
+    initial: NoteColor,
+    onChange: (color: NoteColor) => void,
+  ): HTMLElement {
+    const row = document.createElement('div');
+    row.className = 'hda-widget__colors';
+
+    const buttons = new Map<NoteColor, HTMLButtonElement>();
+
+    for (const color of NOTE_COLORS) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'hda-widget__color-btn';
+      btn.dataset['color'] = color;
+      btn.title = color;
+      btn.style.background = NOTE_COLOR_DEFS[color].swatch;
+      if (color === initial) btn.classList.add('hda-widget__color-btn--selected');
+
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('hda-widget__color-btn--selected'));
+        btn.classList.add('hda-widget__color-btn--selected');
+        onChange(color);
+      });
+
+      buttons.set(color, btn);
+      row.appendChild(btn);
+    }
+
+    return row;
+  }
+
+  // ── Persistence ───────────────────────────────────────────────────────────
+
+  private async persistNote(
     textarea: HTMLTextAreaElement,
     toggle: HTMLButtonElement,
     status: HTMLSpanElement,
     existing: Note | null,
+    color: NoteColor,
   ): Promise<void> {
     const text = textarea.value.trim();
     const now = Date.now();
@@ -101,6 +149,7 @@ export class NoteWidget {
       propertyId: this.propertyId,
       platform: this.platform,
       text,
+      color,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
     });
