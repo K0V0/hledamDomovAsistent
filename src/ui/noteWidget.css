@@ -10,29 +10,6 @@
   margin-top: 6px;
 }
 
-.hda-widget__toggle {
-  background: #1a73e8;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 4px 10px;
-  cursor: pointer;
-  font-size: 12px;
-  line-height: 1.5;
-  white-space: nowrap;
-}
-
-.hda-widget__toggle:hover {
-  background: #1557b0;
-}
-
-.hda-widget__toggle--has-note {
-  background: #188038;
-}
-
-.hda-widget__toggle--has-note:hover {
-  background: #0d652d;
-}
 
 .hda-widget__panel {
   display: flex;

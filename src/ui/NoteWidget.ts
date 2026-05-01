@@ -59,12 +59,8 @@ export class NoteWidget {
     root.className = 'hda-widget';
     root.dataset['propertyId'] = this.propertyId;
 
-    const toggle = document.createElement('button');
-    this.applyToggleState(toggle, existing?.text ?? '');
-
     const panel = document.createElement('div');
     panel.className = 'hda-widget__panel';
-    panel.hidden = true;
 
     const textarea = document.createElement('textarea');
     textarea.className = 'hda-widget__textarea';
@@ -77,16 +73,11 @@ export class NoteWidget {
 
     const colorRow = this.createColorRow(activeColor, color => {
       activeColor = color;
-      this.persistNote(textarea, toggle, status, existing, activeColor);
+      this.persistNote(textarea, status, existing, activeColor).catch(() => undefined);
     });
 
     panel.append(colorRow, textarea, status);
-    root.append(toggle, panel);
-
-    toggle.addEventListener('click', () => {
-      panel.hidden = !panel.hidden;
-      if (!panel.hidden) textarea.focus();
-    });
+    root.append(panel);
 
     let saveTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -94,7 +85,7 @@ export class NoteWidget {
       status.textContent = 'Saving...';
       if (saveTimer) clearTimeout(saveTimer);
       saveTimer = setTimeout(
-        () => this.persistNote(textarea, toggle, status, existing, activeColor),
+        () => this.persistNote(textarea, status, existing, activeColor),
         800,
       );
     });
@@ -137,7 +128,6 @@ export class NoteWidget {
 
   private async persistNote(
     textarea: HTMLTextAreaElement,
-    toggle: HTMLButtonElement,
     status: HTMLSpanElement,
     existing: Note | null,
     color: NoteColor,
@@ -154,16 +144,7 @@ export class NoteWidget {
       updatedAt: now,
     });
 
-    this.applyToggleState(toggle, text);
     status.textContent = 'Saved';
     setTimeout(() => (status.textContent = ''), 1500);
-  }
-
-  private applyToggleState(toggle: HTMLButtonElement, text: string): void {
-    const hasNote = text.length > 0;
-    toggle.textContent = hasNote ? '📝 Note' : '+ Add note';
-    toggle.title = hasNote ? 'View / edit note' : 'Add a note for this property';
-    toggle.className =
-      'hda-widget__toggle' + (hasNote ? ' hda-widget__toggle--has-note' : '');
   }
 }
