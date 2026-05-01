@@ -8,6 +8,7 @@ const config = {
     'src/content/sreality.ts',
     'src/content/mmreality.ts',
     'src/background/service-worker.ts',
+    'src/popup/popup.ts',
   ],
   bundle: true,
   loader: { '.css': 'text' },

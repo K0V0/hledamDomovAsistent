@@ -1,0 +1,5 @@
+document.getElementById('menu-overview')?.addEventListener('click', e => {
+  e.preventDefault();
+  chrome.tabs.create({ url: chrome.runtime.getURL('overview.html') });
+  window.close();
+});
