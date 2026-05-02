@@ -44,4 +44,20 @@ export class SrealityScraper extends AbstractScraper {
       document.querySelector('main')
     );
   }
+
+  protected override getTitleFromDetailPage(): string | null {
+    return (
+      document.querySelector<HTMLElement>('.property-detail-header h1')?.textContent?.trim() ??
+      document.querySelector<HTMLElement>('h1')?.textContent?.trim() ??
+      null
+    );
+  }
+
+  protected override getPriceFromDetailPage(): number | null {
+    const raw =
+      document.querySelector<HTMLElement>('[class*="price-value"]')?.textContent ??
+      document.querySelector<HTMLElement>('.b-property-price strong')?.textContent ??
+      document.querySelector<HTMLElement>('[class*="PropertyPrice"]')?.textContent;
+    return this.parsePrice(raw);
+  }
 }

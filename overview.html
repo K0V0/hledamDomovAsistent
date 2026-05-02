@@ -83,11 +83,12 @@
       background: #dbeafe;
     }
 
-    .col-color { width: 44px; }
-    .col-link { width: 33%; }
-    .col-platform { width: 10%; }
-    .col-text { width: auto; }
-    .col-date { width: 10%; }
+    .col-color    { width: 44px; }
+    .col-title    { width: 28%; }
+    .col-price    { width: 11%; white-space: nowrap; }
+    .col-platform { width: 9%; }
+    .col-text     { width: auto; }
+    .col-date     { width: 9%; }
 
     .col-color-cell { text-align: center; }
 
@@ -102,11 +103,19 @@
     .property-link {
       color: #1a73e8;
       text-decoration: none;
+    }
+
+    .property-link:hover { text-decoration: underline; }
+
+    .property-link--url {
+      font-size: 11px;
+      color: #5f6368;
       word-break: break-all;
     }
 
-    .property-link:hover {
-      text-decoration: underline;
+    .price {
+      font-weight: 600;
+      color: #202124;
     }
 
     .note-text {
@@ -159,11 +168,12 @@
     <table>
       <thead>
         <tr>
-          <th class="col-color" data-sort="color">Barva</th>
-          <th class="col-link" data-sort="propertyId">Nemovitost</th>
+          <th class="col-color"    data-sort="color">Barva</th>
+          <th class="col-title"   data-sort="title">Název</th>
+          <th class="col-price"   data-sort="price">Cena</th>
           <th class="col-platform" data-sort="platform">Portál</th>
           <th class="col-text">Poznámka</th>
-          <th class="col-date" data-sort="createdAt">Přidáno</th>
+          <th class="col-date"    data-sort="createdAt">Přidáno</th>
         </tr>
       </thead>
       <tbody id="notes-body"></tbody>

@@ -43,6 +43,18 @@ export abstract class AbstractScraper {
   // ── Shared ───────────────────────────────────────────────────────────────
 
   /**
+   * Strip whitespace and non-digit characters from a raw price string and
+   * return the integer value, or null if nothing numeric is found.
+   * e.g. "1 000 000 Kč" → 1000000
+   */
+  protected parsePrice(raw: string | null | undefined): number | null {
+    if (!raw) return null;
+    const digits = raw.replace(/\s/g, '').replace(/\D/g, '');
+    const n = parseInt(digits, 10);
+    return isNaN(n) ? null : n;
+  }
+
+  /**
    * Derive a stable, storage-safe key from a URL.
    * Strips query params, fragment, and trailing slash.
    */
@@ -55,12 +67,14 @@ export abstract class AbstractScraper {
     }
   }
 
-  /**
-   *    Insert note at the beginning of containing element
-   */
-  protected injectNoteAtTheBeginningOfContainer(): boolean {
-      return false;
-  }
+  /** Extract the property title from the detail page. Override per platform. */
+  protected getTitleFromDetailPage(): string | null { return null; }
+
+  /** Extract and parse the property price from the detail page. Override per platform. */
+  protected getPriceFromDetailPage(): number | null { return null; }
+
+  /** Insert note at the beginning of containing element. */
+  protected injectNoteAtTheBeginningOfContainer(): boolean { return false; }
 
   // ── Lifecycle ────────────────────────────────────────────────────────────
 
@@ -111,16 +125,26 @@ export abstract class AbstractScraper {
     this.log.debug(`getDetailInsertionPoint → ${describeElement(target)}  propertyId="${propertyId}"`);
     if (!target) return;
 
-    await this.injectWidget(propertyId, target, 'detail');
+    const title = this.getTitleFromDetailPage();
+    const price = this.getPriceFromDetailPage();
+    this.log.debug(`getTitleFromDetailPage → ${title ?? 'null'}  getPriceFromDetailPage → ${price ?? 'null'}`);
+
+    await this.injectWidget(propertyId, target, 'detail', title, price);
   }
 
-  private async injectWidget(propertyId: string, target: Element, mode: WidgetMode): Promise<void> {
+  private async injectWidget(
+    propertyId: string,
+    target: Element,
+    mode: WidgetMode,
+    title: string | null = null,
+    price: number | null = null,
+  ): Promise<void> {
     if (target.querySelector('.hda-widget')) {
       this.log.debug(`widget already present, skipping  propertyId="${propertyId}"`);
       return;
     }
 
-    const widget = new NoteWidget(propertyId, this.platformId, this.repository, mode);
+    const widget = new NoteWidget(propertyId, this.platformId, this.repository, mode, title, price);
     const el = await widget.createElement();
 
     if (!el) {
