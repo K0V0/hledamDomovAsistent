@@ -1,5 +1,6 @@
 import { AbstractScraper } from '../AbstractScraper';
 import type { PlatformId } from '../../domain/Platform';
+import overrideCss from './override.css';
 
 /**
  * Scraper for sreality.cz.
@@ -12,6 +13,7 @@ import type { PlatformId } from '../../domain/Platform';
  */
 export class SrealityScraper extends AbstractScraper {
   override readonly platformId: PlatformId = 'sreality';
+  protected override readonly platformStyleOverrides = overrideCss;
 
   override getListItemSelector(): string {
     return 'article.property';

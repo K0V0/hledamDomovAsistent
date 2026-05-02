@@ -1,6 +1,7 @@
 import type { PlatformId } from '../domain/Platform';
 import type { NoteRepository } from '../repository/NoteRepository';
-import { NoteWidget } from '../ui/NoteWidget';
+import { NoteWidget, type WidgetMode } from '../ui/NoteWidget';
+import { injectStyles } from '../ui/styles';
 import { createLogger, type Logger } from '../utils/Logger';
 
 export abstract class AbstractScraper {
@@ -9,6 +10,9 @@ export abstract class AbstractScraper {
   // Logger context is set to the concrete subclass name (e.g. "SrealityScraper"),
   // so inherited method calls appear as [SrealityScraper > AbstractScraper.method].
   protected readonly log: Logger;
+
+  /** Platform-specific CSS appended after base styles. Set via override.css in each platform directory. */
+  protected readonly platformStyleOverrides: string = '';
 
   constructor(protected readonly repository: NoteRepository) {
     this.log = createLogger(this.constructor.name);
@@ -62,6 +66,7 @@ export abstract class AbstractScraper {
 
   async init(): Promise<void> {
     this.log.info(`starting on ${location.href}`);
+    injectStyles(this.platformStyleOverrides);
     await this.processPage();
     this.observeDOM();
   }
@@ -93,7 +98,7 @@ export abstract class AbstractScraper {
     this.log.debug(`getListItemInsertionPoint → ${describeElement(target)}  propertyId="${propertyId}"`);
     if (!target) return;
 
-    await this.injectWidget(propertyId, target);
+    await this.injectWidget(propertyId, target, 'list');
   }
 
   private async processDetailPage(): Promise<void> {
@@ -106,23 +111,29 @@ export abstract class AbstractScraper {
     this.log.debug(`getDetailInsertionPoint → ${describeElement(target)}  propertyId="${propertyId}"`);
     if (!target) return;
 
-    await this.injectWidget(propertyId, target);
+    await this.injectWidget(propertyId, target, 'detail');
   }
 
-  private async injectWidget(propertyId: string, target: Element): Promise<void> {
+  private async injectWidget(propertyId: string, target: Element, mode: WidgetMode): Promise<void> {
     if (target.querySelector('.hda-widget')) {
       this.log.debug(`widget already present, skipping  propertyId="${propertyId}"`);
       return;
     }
 
-    const widget = new NoteWidget(propertyId, this.platformId, this.repository);
+    const widget = new NoteWidget(propertyId, this.platformId, this.repository, mode);
     const el = await widget.createElement();
+
+    if (!el) {
+      this.log.debug(`no note for list item, widget suppressed  propertyId="${propertyId}"`);
+      return;
+    }
+
     if (this.injectNoteAtTheBeginningOfContainer()) {
       target.prepend(el);
     } else {
       target.appendChild(el);
     }
-    this.log.debug(`widget injected  propertyId="${propertyId}"`);
+    this.log.debug(`widget injected (${mode})  propertyId="${propertyId}"`);
   }
 
   private observeDOM(): void {

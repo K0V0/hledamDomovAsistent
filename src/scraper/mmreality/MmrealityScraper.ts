@@ -1,5 +1,6 @@
 import { AbstractScraper } from '../AbstractScraper';
 import type { PlatformId } from '../../domain/Platform';
+import overrideCss from './override.css';
 
 /**
  * Scraper for mmreality.cz.
@@ -9,6 +10,7 @@ import type { PlatformId } from '../../domain/Platform';
  */
 export class MmrealityScraper extends AbstractScraper {
   override readonly platformId: PlatformId = 'mmreality';
+  protected override readonly platformStyleOverrides = overrideCss;
 
   override getListItemSelector(): string {
     return 'div#offers-list > a';
