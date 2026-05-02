@@ -1,8 +1,8 @@
 import { noteDataSource } from '../config/datasource';
-import type { Note } from '../domain/Note';
+import type { Note, NoteItem } from '../domain/Note';
 import { DEFAULT_COLOR, NOTE_COLOR_DEFS, NOTE_COLORS } from '../ui/noteColors';
 
-type SortKey = 'color' | 'propertyId' | 'platform' | 'text' | 'createdAt';
+type SortKey = 'color' | 'propertyId' | 'platform' | 'createdAt';
 
 let notes: Note[] = [];
 let sortKey: SortKey = 'createdAt';
@@ -64,16 +64,46 @@ function buildRow(note: Note): HTMLTableRowElement {
   const tdPlatform = document.createElement('td');
   tdPlatform.textContent = note.platform;
 
-  const tdText = document.createElement('td');
-  tdText.className = 'note-text';
-  tdText.textContent = note.text;
+  const tdItems = document.createElement('td');
+  tdItems.className = 'note-items';
+  buildItemsCell(tdItems, note.items ?? []);
 
   const tdDate = document.createElement('td');
   tdDate.className = 'date';
   tdDate.textContent = formatDate(note.createdAt);
 
-  tr.append(tdColor, tdLink, tdPlatform, tdText, tdDate);
+  tr.append(tdColor, tdLink, tdPlatform, tdItems, tdDate);
   return tr;
+}
+
+function buildItemsCell(td: HTMLElement, items: NoteItem[]): void {
+  const positives = items.filter(i => i.type === 'positive');
+  const negatives = items.filter(i => i.type === 'negative');
+
+  for (const item of positives) td.appendChild(buildNoteItemEl(item));
+
+  if (positives.length && negatives.length) {
+    const sep = document.createElement('div');
+    sep.className = 'note-item-sep';
+    td.appendChild(sep);
+  }
+
+  for (const item of negatives) td.appendChild(buildNoteItemEl(item));
+}
+
+function buildNoteItemEl(item: NoteItem): HTMLElement {
+  const row = document.createElement('div');
+  row.className = `note-item note-item--${item.type}`;
+
+  const icon = document.createElement('span');
+  icon.className = 'note-item__icon';
+  icon.textContent = item.type === 'positive' ? '+' : '−';
+
+  const text = document.createElement('span');
+  text.textContent = item.text;
+
+  row.append(icon, text);
+  return row;
 }
 
 function comparator(): (a: Note, b: Note) => number {

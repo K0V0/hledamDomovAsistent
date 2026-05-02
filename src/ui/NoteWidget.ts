@@ -1,4 +1,4 @@
-import type { Note, NoteColor } from '../domain/Note';
+import type { Note, NoteColor, NoteItem, NoteItemType } from '../domain/Note';
 import type { PlatformId } from '../domain/Platform';
 import type { NoteRepository } from '../repository/NoteRepository';
 import { DEFAULT_COLOR, NOTE_COLOR_DEFS, NOTE_COLORS } from './noteColors';
@@ -23,8 +23,8 @@ export class NoteWidget {
     const existing = await this.repository.get(this.propertyId);
 
     if (this.mode === 'list') {
-      if (!existing?.text) return null;
-      return this.createListElement(existing.text, existing.color ?? DEFAULT_COLOR);
+      if (!existing?.items?.length) return null;
+      return this.createListElement(existing.items, existing.color ?? DEFAULT_COLOR);
     }
 
     return this.createDetailElement(existing);
@@ -32,19 +32,30 @@ export class NoteWidget {
 
   // ── List view — read-only ─────────────────────────────────────────────────
 
-  private createListElement(text: string, color: NoteColor): HTMLElement {
-    const { bg, border, text: textColor } = NOTE_COLOR_DEFS[color];
+  private createListElement(items: NoteItem[], color: NoteColor): HTMLElement {
+    const { bg, border } = NOTE_COLOR_DEFS[color];
 
     const root = document.createElement('div');
     root.className = 'hda-widget hda-widget--list';
     root.dataset['propertyId'] = this.propertyId;
 
-    const preview = document.createElement('p');
+    const preview = document.createElement('div');
     preview.className = 'hda-widget__preview';
-    preview.textContent = text;
     preview.style.background = bg;
     preview.style.borderLeftColor = border;
-    preview.style.color = textColor;
+
+    const positives = items.filter(i => i.type === 'positive');
+    const negatives = items.filter(i => i.type === 'negative');
+
+    for (const item of positives) preview.appendChild(buildNoteItemEl(item));
+
+    if (positives.length && negatives.length) {
+      const sep = document.createElement('div');
+      sep.className = 'hda-note-item-sep';
+      preview.appendChild(sep);
+    }
+
+    for (const item of negatives) preview.appendChild(buildNoteItemEl(item));
 
     root.appendChild(preview);
     return root;
@@ -62,33 +73,88 @@ export class NoteWidget {
     const panel = document.createElement('div');
     panel.className = 'hda-widget__panel';
 
-    const textarea = document.createElement('textarea');
-    textarea.className = 'hda-widget__textarea';
-    textarea.placeholder = 'Your notes for this property...';
-    textarea.value = existing?.text ?? '';
-    textarea.rows = 4;
+    const positiveGroup = document.createElement('div');
+    positiveGroup.className = 'hda-widget__item-group';
+    positiveGroup.dataset['type'] = 'positive';
+
+    const negativeGroup = document.createElement('div');
+    negativeGroup.className = 'hda-widget__item-group';
+    negativeGroup.dataset['type'] = 'negative';
+
+    const itemsContainer = document.createElement('div');
+    itemsContainer.className = 'hda-widget__items';
+    itemsContainer.append(positiveGroup, negativeGroup);
 
     const status = document.createElement('span');
     status.className = 'hda-widget__status';
 
-    const colorRow = this.createColorRow(activeColor, color => {
-      activeColor = color;
-      this.persistNote(textarea, status, existing, activeColor).catch(() => undefined);
-    });
-
-    panel.append(colorRow, textarea, status);
-    root.append(panel);
-
     let saveTimer: ReturnType<typeof setTimeout> | null = null;
-
-    textarea.addEventListener('input', () => {
+    const scheduleSave = () => {
       status.textContent = 'Saving...';
       if (saveTimer) clearTimeout(saveTimer);
       saveTimer = setTimeout(
-        () => this.persistNote(textarea, status, existing, activeColor),
+        () => this.persistNote(itemsContainer, status, existing, activeColor).catch(() => undefined),
         800,
       );
+    };
+
+    const addRow = (group: HTMLElement, type: NoteItemType, text: string, focus = false) => {
+      const row = document.createElement('div');
+      row.className = 'hda-widget__item';
+
+      const icon = document.createElement('span');
+      icon.className = `hda-widget__item-icon hda-widget__item-icon--${type}`;
+      icon.textContent = type === 'positive' ? '+' : '−';
+
+      const ta = document.createElement('textarea');
+      ta.className = 'hda-widget__item-textarea';
+      ta.value = text;
+      ta.rows = 2;
+      ta.placeholder = type === 'positive' ? 'Co se mi líbí...' : 'Co mi vadí...';
+      ta.addEventListener('input', scheduleSave);
+
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'hda-widget__item-remove';
+      removeBtn.textContent = '×';
+      removeBtn.addEventListener('click', () => {
+        row.remove();
+        this.persistNote(itemsContainer, status, existing, activeColor).catch(() => undefined);
+      });
+
+      row.append(icon, ta, removeBtn);
+      group.appendChild(row);
+      if (focus) ta.focus();
+    };
+
+    for (const item of existing?.items ?? []) {
+      const group = item.type === 'positive' ? positiveGroup : negativeGroup;
+      addRow(group, item.type, item.text);
+    }
+
+    const colorRow = this.createColorRow(activeColor, color => {
+      activeColor = color;
+      this.persistNote(itemsContainer, status, existing, activeColor).catch(() => undefined);
     });
+
+    const actions = document.createElement('div');
+    actions.className = 'hda-widget__actions';
+
+    const addPositiveBtn = document.createElement('button');
+    addPositiveBtn.type = 'button';
+    addPositiveBtn.className = 'hda-widget__add-btn hda-widget__add-btn--positive';
+    addPositiveBtn.textContent = '+ Přidat pozitivní hodnocení';
+    addPositiveBtn.addEventListener('click', () => addRow(positiveGroup, 'positive', '', true));
+
+    const addNegativeBtn = document.createElement('button');
+    addNegativeBtn.type = 'button';
+    addNegativeBtn.className = 'hda-widget__add-btn hda-widget__add-btn--negative';
+    addNegativeBtn.textContent = '− Přidat negativní hodnocení';
+    addNegativeBtn.addEventListener('click', () => addRow(negativeGroup, 'negative', '', true));
+
+    actions.append(addPositiveBtn, addNegativeBtn);
+    panel.append(colorRow, itemsContainer, actions, status);
+    root.append(panel);
 
     return root;
   }
@@ -127,18 +193,18 @@ export class NoteWidget {
   // ── Persistence ───────────────────────────────────────────────────────────
 
   private async persistNote(
-    textarea: HTMLTextAreaElement,
+    itemsContainer: HTMLElement,
     status: HTMLSpanElement,
     existing: Note | null,
     color: NoteColor,
   ): Promise<void> {
-    const text = textarea.value.trim();
+    const items = this.collectItems(itemsContainer);
     const now = Date.now();
 
     await this.repository.save({
       propertyId: this.propertyId,
       platform: this.platform,
-      text,
+      items,
       color,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
@@ -147,4 +213,32 @@ export class NoteWidget {
     status.textContent = 'Saved';
     setTimeout(() => (status.textContent = ''), 1500);
   }
+
+  private collectItems(container: HTMLElement): NoteItem[] {
+    const items: NoteItem[] = [];
+    container.querySelectorAll<HTMLElement>('.hda-widget__item-group').forEach(group => {
+      const type = group.dataset['type'] as NoteItemType;
+      group.querySelectorAll<HTMLTextAreaElement>('.hda-widget__item-textarea').forEach(ta => {
+        const text = ta.value.trim();
+        if (text) items.push({ type, text });
+      });
+    });
+    return items;
+  }
+}
+
+function buildNoteItemEl(item: NoteItem): HTMLElement {
+  const row = document.createElement('div');
+  row.className = `hda-note-item hda-note-item--${item.type}`;
+
+  const icon = document.createElement('span');
+  icon.className = 'hda-note-item__icon';
+  icon.textContent = item.type === 'positive' ? '+' : '−';
+
+  const text = document.createElement('span');
+  text.className = 'hda-note-item__text';
+  text.textContent = item.text;
+
+  row.append(icon, text);
+  return row;
 }

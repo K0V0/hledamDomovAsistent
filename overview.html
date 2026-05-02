@@ -129,6 +129,26 @@
       font-size: 10px;
       margin-left: 4px;
     }
+
+    /* ── Note items in table ─── */
+
+    .note-item {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .note-item__icon {
+      flex-shrink: 0;
+      font-weight: 700;
+    }
+
+    .note-item--positive .note-item__icon { color: #15803d; }
+    .note-item--negative .note-item__icon { color: #dc2626; }
+
+    .note-item-sep { height: 5px; }
   </style>
 </head>
 <body>
@@ -142,7 +162,7 @@
           <th class="col-color" data-sort="color">Barva</th>
           <th class="col-link" data-sort="propertyId">Nemovitost</th>
           <th class="col-platform" data-sort="platform">Portál</th>
-          <th class="col-text" data-sort="text">Poznámka</th>
+          <th class="col-text">Poznámka</th>
           <th class="col-date" data-sort="createdAt">Přidáno</th>
         </tr>
       </thead>
