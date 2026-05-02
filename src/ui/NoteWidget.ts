@@ -12,6 +12,8 @@ export class NoteWidget {
     private readonly platform: PlatformId,
     private readonly repository: NoteRepository,
     private readonly mode: WidgetMode = 'detail',
+    private readonly scrapedTitle: string | null = null,
+    private readonly scrapedPrice: number | null = null,
   ) {}
 
   /**
@@ -206,6 +208,8 @@ export class NoteWidget {
       platform: this.platform,
       items,
       color,
+      title: this.scrapedTitle ?? existing?.title,
+      price: this.scrapedPrice ?? existing?.price,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
     });

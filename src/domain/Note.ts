@@ -14,6 +14,8 @@ export interface Note {
   items: NoteItem[];
   color?: NoteColor;
   platform: PlatformId;
+  title?: string;
+  price?: number;
   createdAt: number;
   updatedAt: number;
 }

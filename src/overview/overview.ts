@@ -2,7 +2,7 @@ import { noteDataSource } from '../config/datasource';
 import type { Note, NoteItem } from '../domain/Note';
 import { DEFAULT_COLOR, NOTE_COLOR_DEFS, NOTE_COLORS } from '../ui/noteColors';
 
-type SortKey = 'color' | 'propertyId' | 'platform' | 'createdAt';
+type SortKey = 'color' | 'title' | 'price' | 'platform' | 'createdAt';
 
 let notes: Note[] = [];
 let sortKey: SortKey = 'createdAt';
@@ -22,7 +22,7 @@ function render(): void {
   if (sorted.length === 0) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
-    td.colSpan = 5;
+    td.colSpan = 7;
     td.className = 'empty';
     td.textContent = 'Zatím žádné poznámky nebyly přidány.';
     tr.appendChild(td);
@@ -52,14 +52,21 @@ function buildRow(note: Note): HTMLTableRowElement {
   dot.title = color;
   tdColor.appendChild(dot);
 
-  const tdLink = document.createElement('td');
+  const tdTitle = document.createElement('td');
   const a = document.createElement('a');
   a.href = `https://${note.propertyId}`;
   a.target = '_blank';
   a.rel = 'noopener noreferrer';
   a.className = 'property-link';
-  a.textContent = note.propertyId;
-  tdLink.appendChild(a);
+  a.textContent = note.title ?? note.propertyId;
+  if (!note.title) a.classList.add('property-link--url');
+  tdTitle.appendChild(a);
+
+  const tdPrice = document.createElement('td');
+  tdPrice.className = 'price';
+  tdPrice.textContent = note.price != null
+    ? note.price.toLocaleString('cs-CZ') + ' Kč'
+    : '';
 
   const tdPlatform = document.createElement('td');
   tdPlatform.textContent = note.platform;
@@ -72,7 +79,7 @@ function buildRow(note: Note): HTMLTableRowElement {
   tdDate.className = 'date';
   tdDate.textContent = formatDate(note.createdAt);
 
-  tr.append(tdColor, tdLink, tdPlatform, tdItems, tdDate);
+  tr.append(tdColor, tdTitle, tdPrice, tdPlatform, tdItems, tdDate);
   return tr;
 }
 
@@ -113,6 +120,13 @@ function comparator(): (a: Note, b: Note) => number {
       const ai = NOTE_COLORS.indexOf(a.color ?? DEFAULT_COLOR);
       const bi = NOTE_COLORS.indexOf(b.color ?? DEFAULT_COLOR);
       cmp = ai - bi;
+    } else if (sortKey === 'price') {
+      const ap = a.price;
+      const bp = b.price;
+      if (ap == null && bp == null) cmp = 0;
+      else if (ap == null) cmp = 1;
+      else if (bp == null) cmp = -1;
+      else cmp = ap - bp;
     } else {
       const av = a[sortKey];
       const bv = b[sortKey];

@@ -29,7 +29,6 @@ export class MmrealityScraper extends AbstractScraper {
   }
 
   override isDetailPage(): boolean {
-      console.log(location.pathname);
     return /\/nemovitosti\/\d+/.test(location.pathname);
   }
 
@@ -43,5 +42,14 @@ export class MmrealityScraper extends AbstractScraper {
 
   override injectNoteAtTheBeginningOfContainer(): boolean {
     return true;
+  }
+
+  protected override getTitleFromDetailPage(): string | null {
+    return document.querySelector<HTMLElement>('h2')?.textContent?.trim() ?? null;
+  }
+
+  protected override getPriceFromDetailPage(): number | null {
+    const raw = document.querySelector<HTMLElement>('div.tw-text-text-price')?.textContent;
+    return this.parsePrice(raw);
   }
 }

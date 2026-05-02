@@ -97,6 +97,7 @@
 /* ── Add-item action buttons ─────────────────────────────────────────────── */
 
 .hda-widget__actions {
+  margin-top: 0.25em;
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
@@ -130,7 +131,6 @@
   margin: 0;
   font-family: system-ui, sans-serif;
   font-size: 1em;
-  max-height: 72px;
   overflow: hidden;
 }
 
