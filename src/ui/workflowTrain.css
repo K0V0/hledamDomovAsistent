@@ -14,7 +14,8 @@
 .hda-workflow__step {
   display: inline-block;
   padding: 4px 10px;
-  font-size: 11px;
+  font-size: 0.875em;
+  margin: 0.25em 0;
   font-weight: 500;
   font-family: inherit;
   background: #f3f4f6;
@@ -58,11 +59,13 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 0;
+  margin-bottom: 0.5em;
 }
 
 .hda-wf-step {
-  font-size: 10px;
+  font-size: 0.75em;
   padding: 1px 7px;
+  margin: 0.25em 0;
   background: #dbeafe;
   color: #1d4ed8;
   border-radius: 8px;

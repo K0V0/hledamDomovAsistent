@@ -54,42 +54,38 @@ export class NoteWidget {
     checkedStepIds: string[],
     allSteps: WorkflowStep[],
   ): HTMLElement {
-    const { bg, border } = NOTE_COLOR_DEFS[color];
-
     const root = document.createElement('div');
     root.className = 'hda-widget hda-widget--list';
     root.dataset['propertyId'] = this.propertyId;
 
-    const preview = document.createElement('div');
-    preview.className = 'hda-widget__preview';
-    preview.style.background = bg;
-    preview.style.borderLeftColor = border;
-
     const checkedSteps = allSteps.filter(s => checkedStepIds.includes(s.id));
     if (checkedSteps.length > 0) {
-      preview.appendChild(buildListWorkflowTrain(checkedSteps));
+      root.appendChild(buildListWorkflowTrain(checkedSteps));
     }
 
-    if (checkedSteps.length > 0 && items.length > 0) {
-      const sep = document.createElement('div');
-      sep.className = 'hda-wf-sep';
-      preview.appendChild(sep);
+    if (items.length > 0) {
+      const { bg, border } = NOTE_COLOR_DEFS[color];
+      const preview = document.createElement('div');
+      preview.className = 'hda-widget__preview';
+      preview.style.background = bg;
+      preview.style.borderLeftColor = border;
+
+      const positives = items.filter(i => i.type === 'positive');
+      const negatives = items.filter(i => i.type === 'negative');
+
+      for (const item of positives) preview.appendChild(buildNoteItemEl(item));
+
+      if (positives.length && negatives.length) {
+        const sep = document.createElement('div');
+        sep.className = 'hda-note-item-sep';
+        preview.appendChild(sep);
+      }
+
+      for (const item of negatives) preview.appendChild(buildNoteItemEl(item));
+
+      root.appendChild(preview);
     }
 
-    const positives = items.filter(i => i.type === 'positive');
-    const negatives = items.filter(i => i.type === 'negative');
-
-    for (const item of positives) preview.appendChild(buildNoteItemEl(item));
-
-    if (positives.length && negatives.length) {
-      const sep = document.createElement('div');
-      sep.className = 'hda-note-item-sep';
-      preview.appendChild(sep);
-    }
-
-    for (const item of negatives) preview.appendChild(buildNoteItemEl(item));
-
-    root.appendChild(preview);
     return root;
   }
 
