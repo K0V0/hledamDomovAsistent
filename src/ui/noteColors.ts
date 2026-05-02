@@ -12,12 +12,12 @@ export const NOTE_COLORS: NoteColor[] = [
 ];
 
 export const NOTE_COLOR_DEFS: Record<NoteColor, ColorDef> = {
-  red:    { swatch: '#ef4444', bg: '#fef2f2', border: '#ef4444', text: '#7f1d1d' },
-  orange: { swatch: '#f97316', bg: '#fff7ed', border: '#f97316', text: '#7c2d12' },
-  green:  { swatch: '#22c55e', bg: '#f0fdf4', border: '#22c55e', text: '#14532d' },
-  blue:   { swatch: '#3b82f6', bg: '#eff6ff', border: '#3b82f6', text: '#1e3a8a' },
-  gray:   { swatch: '#6b7280', bg: '#f9fafb', border: '#9ca3af', text: '#374151' },
-  black:  { swatch: '#1f2937', bg: '#f3f4f6', border: '#374151', text: '#111827' },
+  red:    { swatch: '#dc2626', bg: '#fecaca', border: '#dc2626', text: '#7f1d1d' },
+  orange: { swatch: '#ea580c', bg: '#fed7aa', border: '#ea580c', text: '#7c2d12' },
+  green:  { swatch: '#16a34a', bg: '#bbf7d0', border: '#16a34a', text: '#14532d' },
+  blue:   { swatch: '#2563eb', bg: '#bfdbfe', border: '#2563eb', text: '#1e3a8a' },
+  gray:   { swatch: '#6b7280', bg: '#e5e7eb', border: '#6b7280', text: '#1f2937' },
+  black:  { swatch: '#1f2937', bg: '#d1d5db', border: '#374151', text: '#030712' },
 };
 
 export const DEFAULT_COLOR: NoteColor = 'orange';

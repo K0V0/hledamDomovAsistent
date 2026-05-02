@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Přehled mých nemovitostí – Hledám Domov Asistent</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      font-size: 13px;
+      background: #f8f9fa;
+      color: #202124;
+      min-width: 700px;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e8eaed;
+      padding: 14px 24px;
+    }
+
+    header h1 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    main {
+      padding: 20px 24px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.15);
+    }
+
+    thead tr {
+      background: #1f2937;
+    }
+
+    th {
+      text-align: left;
+      padding: 11px 14px;
+      font-weight: 600;
+      color: #d1d5db;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      white-space: nowrap;
+      user-select: none;
+      border-right: 1px solid #374151;
+    }
+
+    th:last-child { border-right: none; }
+
+    th[data-sort] {
+      cursor: pointer;
+    }
+
+    th[data-sort]:hover {
+      background: #374151;
+      color: #f9fafb;
+    }
+
+    th[aria-sort] {
+      color: #93c5fd;
+    }
+
+    td {
+      padding: 10px 14px;
+      border-top: 1px solid #e5e7eb;
+      vertical-align: top;
+    }
+
+    tbody tr:nth-child(odd) td  { background: #ffffff; }
+    tbody tr:nth-child(even) td { background: #f3f4f6; }
+
+    tbody tr:hover td {
+      background: #dbeafe;
+    }
+
+    .col-color { width: 44px; }
+    .col-link { width: 33%; }
+    .col-platform { width: 10%; }
+    .col-text { width: auto; }
+    .col-date { width: 10%; }
+
+    .col-color-cell { text-align: center; }
+
+    .color-dot {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      vertical-align: middle;
+    }
+
+    .property-link {
+      color: #1a73e8;
+      text-decoration: none;
+      word-break: break-all;
+    }
+
+    .property-link:hover {
+      text-decoration: underline;
+    }
+
+    .note-text {
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .date {
+      color: #5f6368;
+      white-space: nowrap;
+    }
+
+    .empty {
+      text-align: center;
+      color: #5f6368;
+      padding: 32px 14px;
+    }
+
+    .sort-indicator {
+      font-size: 10px;
+      margin-left: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Přehled mých nemovitostí</h1>
+  </header>
+  <main>
+    <table>
+      <thead>
+        <tr>
+          <th class="col-color" data-sort="color">Barva</th>
+          <th class="col-link" data-sort="propertyId">Nemovitost</th>
+          <th class="col-platform" data-sort="platform">Portál</th>
+          <th class="col-text" data-sort="text">Poznámka</th>
+          <th class="col-date" data-sort="createdAt">Přidáno</th>
+        </tr>
+      </thead>
+      <tbody id="notes-body"></tbody>
+    </table>
+  </main>
+  <script src="dist/overview/overview.js"></script>
+</body>
+</html>
