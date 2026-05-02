@@ -1,15 +1,23 @@
 import { noteDataSource } from '../config/datasource';
+import { workflowConfigDataSource } from '../config/workflowDatasource';
 import type { Note, NoteItem } from '../domain/Note';
+import { buildFullWorkflow, type WorkflowStep } from '../domain/WorkflowStep';
 import { DEFAULT_COLOR, NOTE_COLOR_DEFS, NOTE_COLORS } from '../ui/noteColors';
 
-type SortKey = 'color' | 'title' | 'price' | 'platform' | 'createdAt';
+type SortKey = 'color' | 'title' | 'price' | 'platform' | 'workflowStep' | 'createdAt';
 
 let notes: Note[] = [];
+let allWorkflowSteps: WorkflowStep[] = [];
 let sortKey: SortKey = 'createdAt';
 let sortDir: 'asc' | 'desc' = 'desc';
 
 async function init(): Promise<void> {
-  notes = await noteDataSource.getAll();
+  const [loadedNotes, userSteps] = await Promise.all([
+    noteDataSource.getAll(),
+    workflowConfigDataSource.getUserSteps(),
+  ]);
+  notes = loadedNotes;
+  allWorkflowSteps = buildFullWorkflow(userSteps);
   render();
 }
 
@@ -65,11 +73,24 @@ function buildRow(note: Note): HTMLTableRowElement {
   const tdPrice = document.createElement('td');
   tdPrice.className = 'price';
   tdPrice.textContent = note.price != null
-    ? note.price.toLocaleString('cs-CZ') + ' Kč'
+    ? note.price.toLocaleString('cs-CZ') + ' Kč'
     : '';
 
   const tdPlatform = document.createElement('td');
   tdPlatform.textContent = note.platform;
+
+  const tdWorkflow = document.createElement('td');
+  const lastStep = lastCheckedStep(note.workflowStepIds ?? [], allWorkflowSteps);
+  if (lastStep) {
+    const badge = document.createElement('span');
+    badge.className = 'workflow-badge';
+    if (lastStep.id === 'end') badge.classList.add('workflow-badge--end');
+    badge.textContent = lastStep.label;
+    tdWorkflow.appendChild(badge);
+  } else {
+    tdWorkflow.className = 'workflow-badge--none';
+    tdWorkflow.textContent = '—';
+  }
 
   const tdItems = document.createElement('td');
   tdItems.className = 'note-items';
@@ -79,7 +100,7 @@ function buildRow(note: Note): HTMLTableRowElement {
   tdDate.className = 'date';
   tdDate.textContent = formatDate(note.createdAt);
 
-  tr.append(tdColor, tdTitle, tdPrice, tdPlatform, tdItems, tdDate);
+  tr.append(tdColor, tdTitle, tdPrice, tdPlatform, tdWorkflow, tdItems, tdDate);
   return tr;
 }
 
@@ -127,6 +148,9 @@ function comparator(): (a: Note, b: Note) => number {
       else if (ap == null) cmp = 1;
       else if (bp == null) cmp = -1;
       else cmp = ap - bp;
+    } else if (sortKey === 'workflowStep') {
+      cmp = lastCheckedIndex(a.workflowStepIds ?? [], allWorkflowSteps)
+          - lastCheckedIndex(b.workflowStepIds ?? [], allWorkflowSteps);
     } else {
       const av = a[sortKey];
       const bv = b[sortKey];
@@ -155,6 +179,22 @@ function updateSortIndicators(): void {
   indicator.className = 'sort-indicator';
   indicator.textContent = sortDir === 'asc' ? '▲' : '▼';
   active.appendChild(indicator);
+}
+
+function lastCheckedStep(checkedIds: string[], allSteps: WorkflowStep[]): WorkflowStep | null {
+  let last: WorkflowStep | null = null;
+  for (const step of allSteps) {
+    if (checkedIds.includes(step.id)) last = step;
+  }
+  return last;
+}
+
+function lastCheckedIndex(checkedIds: string[], allSteps: WorkflowStep[]): number {
+  let idx = -1;
+  allSteps.forEach((step, i) => {
+    if (checkedIds.includes(step.id)) idx = i;
+  });
+  return idx;
 }
 
 function formatDate(ts: number): string {

@@ -121,7 +121,9 @@
 /* ── List view — read-only preview ──────────────────────────────────────── */
 
 .hda-widget--list {
-  display: block;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .hda-widget__preview {

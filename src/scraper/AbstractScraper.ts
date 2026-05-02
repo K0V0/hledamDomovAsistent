@@ -3,6 +3,7 @@ import type { NoteRepository } from '../repository/NoteRepository';
 import { NoteWidget, type WidgetMode } from '../ui/NoteWidget';
 import { injectStyles } from '../ui/styles';
 import { createLogger, type Logger } from '../utils/Logger';
+import { workflowConfigDataSource } from '../config/workflowDatasource';
 
 export abstract class AbstractScraper {
   abstract readonly platformId: PlatformId;
@@ -144,7 +145,7 @@ export abstract class AbstractScraper {
       return;
     }
 
-    const widget = new NoteWidget(propertyId, this.platformId, this.repository, mode, title, price);
+    const widget = new NoteWidget(propertyId, this.platformId, this.repository, mode, title, price, workflowConfigDataSource);
     const el = await widget.createElement();
 
     if (!el) {

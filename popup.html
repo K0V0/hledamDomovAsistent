@@ -50,6 +50,35 @@
       font-size: 16px;
       flex-shrink: 0;
     }
+
+    .nav-section-label {
+      padding: 8px 16px 4px;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: #9aa0a6;
+    }
+
+    /* ── Status bar ── */
+
+    #popup-status {
+      display: none;
+      padding: 8px 14px;
+      font-size: 11px;
+      line-height: 1.4;
+      border-top: 1px solid #e8eaed;
+    }
+
+    #popup-status.popup-status--success {
+      color: #15803d;
+      background: #f0fdf4;
+    }
+
+    #popup-status.popup-status--error {
+      color: #dc2626;
+      background: #fef2f2;
+    }
   </style>
 </head>
 <body>
@@ -64,8 +93,31 @@
           Přehled mých nemovitostí
         </a>
       </li>
+      <li>
+        <a id="menu-workflow" href="#">
+          <span class="icon">⚙️</span>
+          Workflow
+        </a>
+      </li>
+    </ul>
+    <div class="nav-section-label">Data</div>
+    <ul>
+      <li>
+        <a id="menu-export" href="#">
+          <span class="icon">📤</span>
+          Exportovat data
+        </a>
+      </li>
+      <li>
+        <a id="menu-import" href="#">
+          <span class="icon">📥</span>
+          Importovat data
+        </a>
+      </li>
     </ul>
   </nav>
+  <div id="popup-status"></div>
+  <input type="file" id="import-file" accept=".json" style="display:none" />
   <script src="dist/popup/popup.js"></script>
 </body>
 </html>
