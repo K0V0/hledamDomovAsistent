@@ -84,9 +84,10 @@
     }
 
     .col-color    { width: 44px; }
-    .col-title    { width: 28%; }
+    .col-title    { width: 26%; }
     .col-price    { width: 11%; white-space: nowrap; }
-    .col-platform { width: 9%; }
+    .col-platform { width: 8%; }
+    .col-workflow { width: 12%; }
     .col-text     { width: auto; }
     .col-date     { width: 9%; }
 
@@ -158,6 +159,29 @@
     .note-item--negative .note-item__icon { color: #dc2626; }
 
     .note-item-sep { height: 5px; }
+
+    /* ── Workflow step badge ── */
+
+    .workflow-badge {
+      display: inline-block;
+      padding: 2px 9px;
+      font-size: 11px;
+      font-weight: 500;
+      background: #dbeafe;
+      border-radius: 10px;
+      color: #1d4ed8;
+      white-space: nowrap;
+    }
+
+    .workflow-badge--end {
+      background: #fef9c3;
+      color: #854d0e;
+    }
+
+    .workflow-badge--none {
+      color: #9ca3af;
+      font-style: italic;
+    }
   </style>
 </head>
 <body>
@@ -172,6 +196,7 @@
           <th class="col-title"   data-sort="title">Název</th>
           <th class="col-price"   data-sort="price">Cena</th>
           <th class="col-platform" data-sort="platform">Portál</th>
+          <th class="col-workflow" data-sort="workflowStep">Stav</th>
           <th class="col-text">Poznámka</th>
           <th class="col-date"    data-sort="createdAt">Přidáno</th>
         </tr>

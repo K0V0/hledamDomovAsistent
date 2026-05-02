@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Workflow – Hledám Domov Asistent</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, sans-serif;
+      font-size: 13px;
+      background: #f8f9fa;
+      color: #202124;
+      min-width: 500px;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e8eaed;
+      padding: 14px 24px;
+    }
+
+    header h1 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    main {
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 700px;
+    }
+
+    section {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.12);
+      padding: 18px 20px;
+    }
+
+    section h2 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 14px;
+    }
+
+    /* ── Workflow train preview ── */
+
+    .workflow-train {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0;
+    }
+
+    .workflow-train__step {
+      display: inline-block;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      background: #f3f4f6;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      color: #374151;
+      white-space: nowrap;
+    }
+
+    .workflow-train__step--builtin {
+      background: #dbeafe;
+      border-color: #93c5fd;
+      color: #1e40af;
+    }
+
+    .workflow-train__arrow {
+      margin: 0 6px;
+      font-size: 14px;
+      color: #9ca3af;
+      flex-shrink: 0;
+    }
+
+    /* ── Steps list ── */
+
+    .steps-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+    }
+
+    .step-item--builtin {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+    }
+
+    .step-item__name {
+      flex: 1;
+      font-size: 13px;
+      color: #111827;
+    }
+
+    .step-item--builtin .step-item__name {
+      color: #1e40af;
+    }
+
+    .step-item__badge {
+      font-size: 10px;
+      padding: 2px 7px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      border-radius: 10px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .step-item__remove {
+      font-size: 11px;
+      padding: 3px 10px;
+      background: #fff;
+      border: 1px solid #fca5a5;
+      color: #dc2626;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .step-item__remove:hover {
+      background: #fef2f2;
+    }
+
+    /* ── Add form ── */
+
+    .add-form {
+      display: flex;
+      gap: 8px;
+    }
+
+    .add-form input {
+      flex: 1;
+      font-size: 13px;
+      padding: 7px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      color: #111827;
+      background: #fff;
+    }
+
+    .add-form input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37,99,235,.2);
+    }
+
+    .add-form button {
+      font-size: 13px;
+      padding: 7px 16px;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .add-form button:hover {
+      background: #1d4ed8;
+    }
+
+    .empty-steps {
+      color: #9ca3af;
+      font-style: italic;
+      font-size: 12px;
+      text-align: center;
+      padding: 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Nastavení workflow</h1>
+  </header>
+  <main>
+    <section>
+      <h2>Náhled</h2>
+      <div id="workflow-preview" class="workflow-train"></div>
+    </section>
+
+    <section>
+      <h2>Kroky</h2>
+      <ul id="steps-list" class="steps-list"></ul>
+    </section>
+
+    <section>
+      <h2>Přidat krok</h2>
+      <div class="add-form">
+        <input type="text" id="new-step-label" placeholder="Název kroku (např. Na prohlídce)..." maxlength="60" />
+        <button id="add-step-btn">Přidat</button>
+      </div>
+    </section>
+  </main>
+  <script src="dist/workflow/workflow.js"></script>
+</body>
+</html>

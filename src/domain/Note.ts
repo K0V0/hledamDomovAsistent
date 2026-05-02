@@ -16,6 +16,7 @@ export interface Note {
   platform: PlatformId;
   title?: string;
   price?: number;
+  workflowStepIds?: string[];
   createdAt: number;
   updatedAt: number;
 }

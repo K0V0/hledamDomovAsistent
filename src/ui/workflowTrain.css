@@ -1,0 +1,87 @@
+.hda-workflow {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.hda-workflow__train {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+}
+
+.hda-workflow__step {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  border-radius: 3px;
+  color: #6b7280;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: background .1s, color .1s, border-color .1s;
+}
+
+.hda-workflow__step:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+  color: #374151;
+}
+
+.hda-workflow__step--checked {
+  background: #2563eb;
+  border-color: #1d4ed8;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.hda-workflow__step--checked:hover {
+  background: #1d4ed8;
+}
+
+.hda-workflow__arrow {
+  margin: 0 3px;
+  font-size: 10px;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+/* ── Compact train shown inside list-view cards ── */
+
+.hda-wf-train {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+}
+
+.hda-wf-step {
+  font-size: 10px;
+  padding: 1px 7px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-radius: 8px;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.hda-wf-step--last {
+  background: #2563eb;
+  color: #fff;
+}
+
+.hda-wf-arrow {
+  font-size: 9px;
+  color: #9ca3af;
+  margin: 0 3px;
+  flex-shrink: 0;
+}
+
+.hda-wf-sep {
+  height: 4px;
+}

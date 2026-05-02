@@ -1,7 +1,8 @@
 import widgetCss from './noteWidget.css';
 import colorsCss from './noteColors.css';
+import workflowCss from './workflowTrain.css';
 
-const BASE_CSS = widgetCss + '\n' + colorsCss;
+const BASE_CSS = widgetCss + '\n' + colorsCss + '\n' + workflowCss;
 
 let injected = false;
 

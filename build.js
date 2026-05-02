@@ -10,6 +10,7 @@ const config = {
     'src/background/service-worker.ts',
     'src/popup/popup.ts',
     'src/overview/overview.ts',
+    'src/workflow/workflow.ts',
   ],
   bundle: true,
   loader: { '.css': 'text' },
