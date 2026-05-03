@@ -6,3 +6,8 @@
  * Example:
  *   .hda-widget { margin-top: 0; }
  */
+
+.hda-widget {
+    display: block;
+    margin-bottom: 1em;
+}

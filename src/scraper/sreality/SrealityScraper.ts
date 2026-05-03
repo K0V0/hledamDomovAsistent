@@ -16,17 +16,16 @@ export class SrealityScraper extends AbstractScraper {
   protected override readonly platformStyleOverrides = overrideCss;
 
   override getListItemSelector(): string {
-    return 'article.property';
+    return 'a.MuiLink-underlineAlways';
   }
 
   override getLinkFromListItem(item: Element): string | null {
-    return (
-      item.querySelector<HTMLAnchorElement>('a[href*="/detail/"]')?.href ?? null
-    );
+    const path = item.getAttribute('href');
+    return path ? new URL(path, location.href).href : null;
   }
 
   override getListItemInsertionPoint(item: Element): Element | null {
-    return item.querySelector('.property-title') ?? item;
+    return item.querySelector('div.css-adf8sc') ?? item;
   }
 
   override isDetailPage(): boolean {
@@ -38,18 +37,14 @@ export class SrealityScraper extends AbstractScraper {
   }
 
   override getDetailInsertionPoint(): Element | null {
-    return (
-      document.querySelector('.property-detail-header') ??
-      document.querySelector('h1') ??
-      document.querySelector('main')
-    );
+    return document.querySelector('[data-e2e="detail-description"]');
   }
 
   protected override getTitleFromDetailPage(): string | null {
     return (
-      document.querySelector<HTMLElement>('.property-detail-header h1')?.textContent?.trim() ??
-      document.querySelector<HTMLElement>('h1')?.textContent?.trim() ??
-      null
+        document.querySelector('[data-e2e="detail-heading"]')?.textContent?.trim() ??
+        document.querySelector<HTMLElement>('[data-e2e="detail-heading"]')?.textContent?.trim() ??
+        null
     );
   }
 
@@ -59,5 +54,9 @@ export class SrealityScraper extends AbstractScraper {
       document.querySelector<HTMLElement>('.b-property-price strong')?.textContent ??
       document.querySelector<HTMLElement>('[class*="PropertyPrice"]')?.textContent;
     return this.parsePrice(raw);
+  }
+
+  override injectNoteAtTheBeginningOfContainer(): boolean {
+    return true;
   }
 }

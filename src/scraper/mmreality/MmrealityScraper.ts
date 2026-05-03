@@ -19,7 +19,6 @@ export class MmrealityScraper extends AbstractScraper {
   override getLinkFromListItem(item: Element): string | null {
     // item IS the <a> (matched by "div#offers-list > a").
     // getAttribute returns the raw relative path; new URL resolves it to absolute.
-
     const path = item.getAttribute('href');
     return path ? new URL(path, location.href).href : null;
   }
