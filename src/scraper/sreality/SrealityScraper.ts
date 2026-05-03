@@ -49,10 +49,8 @@ export class SrealityScraper extends AbstractScraper {
   }
 
   protected override getPriceFromDetailPage(): number | null {
-    const raw =
-      document.querySelector<HTMLElement>('[class*="price-value"]')?.textContent ??
-      document.querySelector<HTMLElement>('.b-property-price strong')?.textContent ??
-      document.querySelector<HTMLElement>('[class*="PropertyPrice"]')?.textContent;
+    const raw = document
+        .querySelector<HTMLElement>('p.css-1b1ajfd')?.textContent;
     return this.parsePrice(raw);
   }
 
