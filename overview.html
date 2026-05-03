@@ -83,13 +83,15 @@
       background: #dbeafe;
     }
 
+    /* Compact columns shrink to content; flexible columns absorb the rest.
+       table-layout:auto (default) handles distribution automatically. */
     .col-color    { width: 44px; }
-    .col-title    { width: 26%; }
-    .col-price    { width: 11%; white-space: nowrap; }
-    .col-platform { width: 8%; }
-    .col-workflow { width: 12%; }
-    .col-text     { width: auto; }
-    .col-date     { width: 9%; }
+    .col-title    { min-width: 160px; }
+    .col-price    { white-space: nowrap; }
+    .col-platform { white-space: nowrap; }
+    .col-workflow { white-space: nowrap; }
+    .col-text     { width: 99%; }   /* greedy — takes all remaining space */
+    .col-date     { white-space: nowrap; }
 
     .col-color-cell { text-align: center; }
 
@@ -183,7 +185,7 @@
       font-style: italic;
     }
 
-    .col-dist    { width: 7%; white-space: nowrap; }
+    .col-dist    { white-space: nowrap; }
     .col-delete  { width: 36px; text-align: center; }
 
     .dist-value { color: #374151; }

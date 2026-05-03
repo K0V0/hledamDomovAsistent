@@ -2,7 +2,10 @@ import { noteDataSource } from '../config/datasource';
 import { workflowConfigDataSource } from '../config/workflowDatasource';
 import type { Note, NoteItem } from '../domain/Note';
 import { buildFullWorkflow, type WorkflowStep } from '../domain/WorkflowStep';
-import { DEFAULT_COLOR, NOTE_COLOR_DEFS, NOTE_COLORS } from '../ui/noteColors';
+import { DEFAULT_COLOR, NOTE_COLOR_DEFS } from '../ui/noteColors';
+import type { NoteColor } from '../domain/Note';
+
+const COLOR_SORT_ORDER: NoteColor[] = ['green', 'blue', 'orange', 'red', 'gray', 'black'];
 
 type SortKey = 'color' | 'title' | 'price' | 'platform' | 'workflowStep' | 'createdAt';
 
@@ -172,8 +175,8 @@ function comparator(): (a: Note, b: Note) => number {
   return (a, b) => {
     let cmp: number;
     if (sortKey === 'color') {
-      const ai = NOTE_COLORS.indexOf(a.color ?? DEFAULT_COLOR);
-      const bi = NOTE_COLORS.indexOf(b.color ?? DEFAULT_COLOR);
+      const ai = COLOR_SORT_ORDER.indexOf(a.color ?? DEFAULT_COLOR);
+      const bi = COLOR_SORT_ORDER.indexOf(b.color ?? DEFAULT_COLOR);
       cmp = ai - bi;
     } else if (sortKey === 'price') {
       const ap = a.price;
