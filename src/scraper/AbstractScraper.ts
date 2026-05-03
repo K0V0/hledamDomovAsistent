@@ -1,3 +1,4 @@
+import type { GpsCoordinates } from '../domain/GpsCoordinates';
 import type { PlatformId } from '../domain/Platform';
 import type { NoteRepository } from '../repository/NoteRepository';
 import { NoteWidget, type WidgetMode } from '../ui/NoteWidget';
@@ -40,6 +41,9 @@ export abstract class AbstractScraper {
 
   /** Element on the detail page where the note widget will be inserted. */
   abstract getDetailInsertionPoint(): Element | null;
+
+  /** Extract GPS coordinates for the current detail page, or null if unavailable. */
+  abstract getGpsFromDetailPage(): Promise<GpsCoordinates | null>;
 
   // ── Shared ───────────────────────────────────────────────────────────────
 
@@ -128,9 +132,10 @@ export abstract class AbstractScraper {
 
     const title = this.getTitleFromDetailPage();
     const price = this.getPriceFromDetailPage();
-    this.log.debug(`getTitleFromDetailPage → ${title ?? 'null'}  getPriceFromDetailPage → ${price ?? 'null'}`);
+    const gps = await this.getGpsFromDetailPage();
+    this.log.debug(`getTitleFromDetailPage → ${title ?? 'null'}  getPriceFromDetailPage → ${price ?? 'null'}  getGpsFromDetailPage → ${gps ? `${gps.lat},${gps.lng}` : 'null'}`);
 
-    await this.injectWidget(propertyId, target, 'detail', title, price);
+    await this.injectWidget(propertyId, target, 'detail', title, price, gps);
   }
 
   private async injectWidget(
@@ -139,13 +144,14 @@ export abstract class AbstractScraper {
     mode: WidgetMode,
     title: string | null = null,
     price: number | null = null,
+    gps: GpsCoordinates | null = null,
   ): Promise<void> {
     if (target.querySelector('.hda-widget')) {
       this.log.debug(`widget already present, skipping  propertyId="${propertyId}"`);
       return;
     }
 
-    const widget = new NoteWidget(propertyId, this.platformId, this.repository, mode, title, price, workflowConfigDataSource);
+    const widget = new NoteWidget(propertyId, this.platformId, this.repository, mode, title, price, workflowConfigDataSource, gps);
     const el = await widget.createElement();
 
     if (!el) {

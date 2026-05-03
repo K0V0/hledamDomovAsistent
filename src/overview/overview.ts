@@ -30,7 +30,7 @@ function render(): void {
   if (sorted.length === 0) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
-    td.colSpan = 8;
+    td.colSpan = 11;
     td.className = 'empty';
     td.textContent = 'Zatím žádné poznámky nebyly přidány.';
     tr.appendChild(td);
@@ -100,6 +100,24 @@ function buildRow(note: Note): HTMLTableRowElement {
   tdDate.className = 'date';
   tdDate.textContent = formatDate(note.createdAt);
 
+  const tdAir = document.createElement('td');
+  tdAir.className = 'col-dist';
+  tdAir.appendChild(distCell(
+    note.distanceAirKm != null ? `${note.distanceAirKm.toLocaleString('cs-CZ', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km` : null
+  ));
+
+  const tdRoad = document.createElement('td');
+  tdRoad.className = 'col-dist';
+  tdRoad.appendChild(distCell(
+    note.distanceRoadM != null ? `${(note.distanceRoadM / 1000).toLocaleString('cs-CZ', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km` : null
+  ));
+
+  const tdDuration = document.createElement('td');
+  tdDuration.className = 'col-dist';
+  tdDuration.appendChild(distCell(
+    note.durationRoadS != null ? formatDuration(note.durationRoadS) : null
+  ));
+
   const tdDelete = document.createElement('td');
   tdDelete.className = 'col-delete';
   const btnDelete = document.createElement('button');
@@ -109,7 +127,7 @@ function buildRow(note: Note): HTMLTableRowElement {
   btnDelete.addEventListener('click', () => deleteNote(note.propertyId));
   tdDelete.appendChild(btnDelete);
 
-  tr.append(tdColor, tdTitle, tdPrice, tdPlatform, tdWorkflow, tdItems, tdDate, tdDelete);
+  tr.append(tdColor, tdTitle, tdPrice, tdPlatform, tdWorkflow, tdItems, tdAir, tdRoad, tdDuration, tdDate, tdDelete);
   return tr;
 }
 
@@ -211,6 +229,24 @@ function lastCheckedIndex(checkedIds: string[], allSteps: WorkflowStep[]): numbe
     if (checkedIds.includes(step.id)) idx = i;
   });
   return idx;
+}
+
+function distCell(text: string | null): HTMLElement {
+  const span = document.createElement('span');
+  if (text) {
+    span.className = 'dist-value';
+    span.textContent = text;
+  } else {
+    span.className = 'dist-none';
+    span.textContent = '—';
+  }
+  return span;
+}
+
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.round((seconds % 3600) / 60);
+  return h > 0 ? `${h} h ${m} min` : `${m} min`;
 }
 
 function formatDate(ts: number): string {

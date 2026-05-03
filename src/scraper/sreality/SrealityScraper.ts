@@ -1,4 +1,5 @@
 import { AbstractScraper } from '../AbstractScraper';
+import type { GpsCoordinates } from '../../domain/GpsCoordinates';
 import type { PlatformId } from '../../domain/Platform';
 import overrideCss from './override.css';
 
@@ -56,5 +57,24 @@ export class SrealityScraper extends AbstractScraper {
 
   override injectNoteAtTheBeginningOfContainer(): boolean {
     return true;
+  }
+
+  override async getGpsFromDetailPage(): Promise<GpsCoordinates | null> {
+    // Try JSON-LD structured data (schema.org/RealEstateListing or Place)
+    for (const script of document.querySelectorAll<HTMLScriptElement>('script[type="application/ld+json"]')) {
+      try {
+        const data = JSON.parse(script.textContent ?? '') as Record<string, unknown>;
+        const geo = (data['geo'] ?? (data['location'] as Record<string, unknown> | undefined)?.['geo']) as Record<string, unknown> | undefined;
+        if (typeof geo?.['latitude'] === 'number' && typeof geo?.['longitude'] === 'number') {
+          return { lat: geo['latitude'] as number, lng: geo['longitude'] as number };
+        }
+        if (typeof geo?.['latitude'] === 'string' && typeof geo?.['longitude'] === 'string') {
+          return { lat: parseFloat(geo['latitude'] as string), lng: parseFloat(geo['longitude'] as string) };
+        }
+      } catch {
+        // malformed JSON-LD, skip
+      }
+    }
+    return null;
   }
 }

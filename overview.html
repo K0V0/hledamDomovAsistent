@@ -183,7 +183,11 @@
       font-style: italic;
     }
 
-    .col-delete { width: 36px; text-align: center; }
+    .col-dist    { width: 7%; white-space: nowrap; }
+    .col-delete  { width: 36px; text-align: center; }
+
+    .dist-value { color: #374151; }
+    .dist-none  { color: #d1d5db; }
 
     .btn-delete {
       background: none;
@@ -216,6 +220,9 @@
           <th class="col-platform" data-sort="platform">Portál</th>
           <th class="col-workflow" data-sort="workflowStep">Stav</th>
           <th class="col-text">Poznámka</th>
+          <th class="col-dist">Vzduch</th>
+          <th class="col-dist">Silnice</th>
+          <th class="col-dist">Jízda</th>
           <th class="col-date"    data-sort="createdAt">Přidáno</th>
           <th class="col-delete"></th>
         </tr>

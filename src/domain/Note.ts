@@ -1,3 +1,4 @@
+import type { GpsCoordinates } from './GpsCoordinates';
 import type { PlatformId } from './Platform';
 
 export type NoteColor = 'red' | 'orange' | 'green' | 'blue' | 'gray' | 'black';
@@ -17,6 +18,10 @@ export interface Note {
   title?: string;
   price?: number;
   workflowStepIds?: string[];
+  gps?: GpsCoordinates;
+  distanceAirKm?: number;
+  distanceRoadM?: number;
+  durationRoadS?: number;
   createdAt: number;
   updatedAt: number;
 }
