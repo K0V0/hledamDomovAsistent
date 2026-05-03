@@ -12,6 +12,9 @@
     }
   },
   "permissions": ["storage", "tabs"],
+  "host_permissions": [
+    "https://nominatim.openstreetmap.org/"
+  ],
   "content_scripts": [
     {
       "matches": ["*://*.sreality.cz/*"],

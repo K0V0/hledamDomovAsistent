@@ -17,6 +17,12 @@ document.getElementById('menu-workflow')?.addEventListener('click', e => {
   window.close();
 });
 
+document.getElementById('menu-location')?.addEventListener('click', e => {
+  e.preventDefault();
+  chrome.tabs.create({ url: chrome.runtime.getURL('location-picker.html') });
+  window.close();
+});
+
 // ── Export ────────────────────────────────────────────────────────────────────
 
 document.getElementById('menu-export')?.addEventListener('click', e => {

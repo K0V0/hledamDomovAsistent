@@ -11,6 +11,7 @@ const config = {
     'src/popup/popup.ts',
     'src/overview/overview.ts',
     'src/workflow/workflow.ts',
+    'src/location-picker/location-picker.ts',
   ],
   bundle: true,
   loader: { '.css': 'text' },

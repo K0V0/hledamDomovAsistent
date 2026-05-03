@@ -30,7 +30,7 @@ function render(): void {
   if (sorted.length === 0) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
-    td.colSpan = 7;
+    td.colSpan = 8;
     td.className = 'empty';
     td.textContent = 'Zatím žádné poznámky nebyly přidány.';
     tr.appendChild(td);
@@ -100,7 +100,16 @@ function buildRow(note: Note): HTMLTableRowElement {
   tdDate.className = 'date';
   tdDate.textContent = formatDate(note.createdAt);
 
-  tr.append(tdColor, tdTitle, tdPrice, tdPlatform, tdWorkflow, tdItems, tdDate);
+  const tdDelete = document.createElement('td');
+  tdDelete.className = 'col-delete';
+  const btnDelete = document.createElement('button');
+  btnDelete.className = 'btn-delete';
+  btnDelete.title = 'Smazat';
+  btnDelete.textContent = '×';
+  btnDelete.addEventListener('click', () => deleteNote(note.propertyId));
+  tdDelete.appendChild(btnDelete);
+
+  tr.append(tdColor, tdTitle, tdPrice, tdPlatform, tdWorkflow, tdItems, tdDate, tdDelete);
   return tr;
 }
 
@@ -132,6 +141,13 @@ function buildNoteItemEl(item: NoteItem): HTMLElement {
 
   row.append(icon, text);
   return row;
+}
+
+async function deleteNote(propertyId: string): Promise<void> {
+  if (!confirm('Opravdu chcete tuto nemovitost smazat?')) return;
+  await noteDataSource.delete(propertyId);
+  notes = notes.filter(n => n.propertyId !== propertyId);
+  render();
 }
 
 function comparator(): (a: Note, b: Note) => number {
