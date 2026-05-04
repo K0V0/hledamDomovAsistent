@@ -1,4 +1,5 @@
 import { AbstractScraper } from '../AbstractScraper';
+import type { GpsCoordinates } from '../../domain/GpsCoordinates';
 import type { PlatformId } from '../../domain/Platform';
 import overrideCss from './override.css';
 
@@ -41,6 +42,29 @@ export class MmrealityScraper extends AbstractScraper {
 
   override injectNoteAtTheBeginningOfContainer(): boolean {
     return true;
+  }
+
+  private _cachedGps: GpsCoordinates | null | undefined = undefined;
+
+  override async getGpsFromDetailPage(): Promise<GpsCoordinates | null> {
+    if (this._cachedGps !== undefined) return this._cachedGps;
+    this._cachedGps = await this.fetchGpsFromSource();
+    return this._cachedGps;
+  }
+
+  private async fetchGpsFromSource(): Promise<GpsCoordinates | null> {
+    try {
+      const res = await fetch(location.href);
+      const html = await res.text();
+      // Server-rendered HTML contains <leaflet-component :leaflet-center="[lat,lng]">
+      const match = html.match(/:leaflet-center="\[([0-9.-]+),([0-9.-]+)\]"/);
+      if (match) {
+        return { lat: parseFloat(match[1]), lng: parseFloat(match[2]) };
+      }
+    } catch {
+      // ignore network errors
+    }
+    return null;
   }
 
   protected override getTitleFromDetailPage(): string | null {

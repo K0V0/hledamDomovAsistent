@@ -12,6 +12,11 @@
     }
   },
   "permissions": ["storage", "tabs"],
+  "host_permissions": [
+    "https://nominatim.openstreetmap.org/",
+    "https://router.project-osrm.org/",
+    "*://*.mmreality.cz/*"
+  ],
   "content_scripts": [
     {
       "matches": ["*://*.sreality.cz/*"],

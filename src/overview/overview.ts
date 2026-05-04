@@ -2,7 +2,10 @@ import { noteDataSource } from '../config/datasource';
 import { workflowConfigDataSource } from '../config/workflowDatasource';
 import type { Note, NoteItem } from '../domain/Note';
 import { buildFullWorkflow, type WorkflowStep } from '../domain/WorkflowStep';
-import { DEFAULT_COLOR, NOTE_COLOR_DEFS, NOTE_COLORS } from '../ui/noteColors';
+import { DEFAULT_COLOR, NOTE_COLOR_DEFS } from '../ui/noteColors';
+import type { NoteColor } from '../domain/Note';
+
+const COLOR_SORT_ORDER: NoteColor[] = ['green', 'blue', 'orange', 'red', 'gray', 'black'];
 
 type SortKey = 'color' | 'title' | 'price' | 'platform' | 'workflowStep' | 'createdAt';
 
@@ -30,7 +33,7 @@ function render(): void {
   if (sorted.length === 0) {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
-    td.colSpan = 7;
+    td.colSpan = 11;
     td.className = 'empty';
     td.textContent = 'Zatím žádné poznámky nebyly přidány.';
     tr.appendChild(td);
@@ -100,7 +103,34 @@ function buildRow(note: Note): HTMLTableRowElement {
   tdDate.className = 'date';
   tdDate.textContent = formatDate(note.createdAt);
 
-  tr.append(tdColor, tdTitle, tdPrice, tdPlatform, tdWorkflow, tdItems, tdDate);
+  const tdAir = document.createElement('td');
+  tdAir.className = 'col-dist';
+  tdAir.appendChild(distCell(
+    note.distanceAirKm != null ? `${note.distanceAirKm.toLocaleString('cs-CZ', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km` : null
+  ));
+
+  const tdRoad = document.createElement('td');
+  tdRoad.className = 'col-dist';
+  tdRoad.appendChild(distCell(
+    note.distanceRoadM != null ? `${(note.distanceRoadM / 1000).toLocaleString('cs-CZ', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km` : null
+  ));
+
+  const tdDuration = document.createElement('td');
+  tdDuration.className = 'col-dist';
+  tdDuration.appendChild(distCell(
+    note.durationRoadS != null ? formatDuration(note.durationRoadS) : null
+  ));
+
+  const tdDelete = document.createElement('td');
+  tdDelete.className = 'col-delete';
+  const btnDelete = document.createElement('button');
+  btnDelete.className = 'btn-delete';
+  btnDelete.title = 'Smazat';
+  btnDelete.textContent = '×';
+  btnDelete.addEventListener('click', () => deleteNote(note.propertyId));
+  tdDelete.appendChild(btnDelete);
+
+  tr.append(tdColor, tdTitle, tdPrice, tdPlatform, tdWorkflow, tdItems, tdAir, tdRoad, tdDuration, tdDate, tdDelete);
   return tr;
 }
 
@@ -134,12 +164,19 @@ function buildNoteItemEl(item: NoteItem): HTMLElement {
   return row;
 }
 
+async function deleteNote(propertyId: string): Promise<void> {
+  if (!confirm('Opravdu chcete tuto nemovitost smazat?')) return;
+  await noteDataSource.delete(propertyId);
+  notes = notes.filter(n => n.propertyId !== propertyId);
+  render();
+}
+
 function comparator(): (a: Note, b: Note) => number {
   return (a, b) => {
     let cmp: number;
     if (sortKey === 'color') {
-      const ai = NOTE_COLORS.indexOf(a.color ?? DEFAULT_COLOR);
-      const bi = NOTE_COLORS.indexOf(b.color ?? DEFAULT_COLOR);
+      const ai = COLOR_SORT_ORDER.indexOf(a.color ?? DEFAULT_COLOR);
+      const bi = COLOR_SORT_ORDER.indexOf(b.color ?? DEFAULT_COLOR);
       cmp = ai - bi;
     } else if (sortKey === 'price') {
       const ap = a.price;
@@ -195,6 +232,24 @@ function lastCheckedIndex(checkedIds: string[], allSteps: WorkflowStep[]): numbe
     if (checkedIds.includes(step.id)) idx = i;
   });
   return idx;
+}
+
+function distCell(text: string | null): HTMLElement {
+  const span = document.createElement('span');
+  if (text) {
+    span.className = 'dist-value';
+    span.textContent = text;
+  } else {
+    span.className = 'dist-none';
+    span.textContent = '—';
+  }
+  return span;
+}
+
+function formatDuration(seconds: number): string {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.round((seconds % 3600) / 60);
+  return h > 0 ? `${h} h ${m} min` : `${m} min`;
 }
 
 function formatDate(ts: number): string {

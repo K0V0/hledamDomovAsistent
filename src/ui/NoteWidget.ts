@@ -1,8 +1,11 @@
+import type { GpsCoordinates } from '../domain/GpsCoordinates';
 import type { Note, NoteColor, NoteItem, NoteItemType } from '../domain/Note';
 import type { PlatformId } from '../domain/Platform';
 import type { NoteRepository } from '../repository/NoteRepository';
 import type { WorkflowConfigDataSource } from '../datasource/WorkflowConfigDataSource';
 import { buildFullWorkflow, type WorkflowStep } from '../domain/WorkflowStep';
+import { getHomeLocation } from '../config/homeLocation';
+import { haversineKm, fetchRoadRoute } from '../utils/distanceService';
 import { DEFAULT_COLOR, NOTE_COLOR_DEFS, NOTE_COLORS } from './noteColors';
 import { injectStyles } from './styles';
 
@@ -17,6 +20,7 @@ export class NoteWidget {
     private readonly scrapedTitle: string | null = null,
     private readonly scrapedPrice: number | null = null,
     private readonly workflowConfig: WorkflowConfigDataSource | null = null,
+    private readonly scrapedGps: GpsCoordinates | null = null,
   ) {}
 
   /**
@@ -297,21 +301,55 @@ export class NoteWidget {
   ): Promise<void> {
     const items = this.collectItems(itemsContainer);
     const now = Date.now();
+    const gps = this.scrapedGps ?? existing?.gps;
 
-    await this.repository.save({
+    const note: Note = {
       propertyId: this.propertyId,
       platform: this.platform,
       items,
       color,
       title: this.scrapedTitle ?? existing?.title,
       price: this.scrapedPrice ?? existing?.price,
+      gps,
+      distanceAirKm: existing?.distanceAirKm,
+      distanceRoadM: existing?.distanceRoadM,
+      durationRoadS: existing?.durationRoadS,
       workflowStepIds,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
-    });
+    };
+
+    await this.repository.save(note);
+
+    // Recalculate distances only if GPS is available and distances aren't cached yet
+    // (or the GPS point changed from what was previously stored)
+    const gpsChanged = gps && (
+      existing?.gps?.lat !== gps.lat || existing?.gps?.lng !== gps.lng
+    );
+    const distancesMissing = gps && existing?.distanceRoadM == null;
+
+    if (gps && (gpsChanged || distancesMissing)) {
+      this.calculateAndSaveDistances(note, gps).catch(() => undefined);
+    }
 
     status.textContent = 'Saved';
     setTimeout(() => (status.textContent = ''), 1500);
+  }
+
+  private async calculateAndSaveDistances(note: Note, gps: GpsCoordinates): Promise<void> {
+    const home = await getHomeLocation();
+    if (!home) return;
+
+    const distanceAirKm = haversineKm(home, gps);
+    const road = await fetchRoadRoute(home, gps);
+
+    await this.repository.save({
+      ...note,
+      gps,
+      distanceAirKm,
+      distanceRoadM: road?.distanceM,
+      durationRoadS: road?.durationS,
+    });
   }
 
   private collectItems(container: HTMLElement): NoteItem[] {
