@@ -20,4 +20,4 @@ export const NOTE_COLOR_DEFS: Record<NoteColor, ColorDef> = {
   black:  { swatch: '#1f2937', bg: '#d1d5db', border: '#374151', text: '#030712' },
 };
 
-export const DEFAULT_COLOR: NoteColor = 'orange';
+export const DEFAULT_COLOR: NoteColor = 'red';
