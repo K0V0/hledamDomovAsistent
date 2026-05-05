@@ -22,26 +22,36 @@ export class ChromeStorageDataSource implements NoteDataSource {
 
   get(propertyId: string): Promise<Note | null> {
     const k = this.key(propertyId);
-    return new Promise(resolve => {
-      this.area.get(k, result => resolve((result[k] as Note) ?? null));
+    return new Promise((resolve, reject) => {
+      this.area.get(k, result => {
+        if (chrome.runtime.lastError) { reject(new Error(chrome.runtime.lastError.message)); return; }
+        resolve((result[k] as Note) ?? null);
+      });
     });
   }
 
   save(note: Note): Promise<void> {
-    return new Promise(resolve => {
-      this.area.set({ [this.key(note.propertyId)]: note }, resolve);
+    return new Promise((resolve, reject) => {
+      this.area.set({ [this.key(note.propertyId)]: note }, () => {
+        if (chrome.runtime.lastError) { reject(new Error(chrome.runtime.lastError.message)); return; }
+        resolve();
+      });
     });
   }
 
   delete(propertyId: string): Promise<void> {
-    return new Promise(resolve => {
-      this.area.remove(this.key(propertyId), resolve);
+    return new Promise((resolve, reject) => {
+      this.area.remove(this.key(propertyId), () => {
+        if (chrome.runtime.lastError) { reject(new Error(chrome.runtime.lastError.message)); return; }
+        resolve();
+      });
     });
   }
 
   getAll(): Promise<Note[]> {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
       this.area.get(null, items => {
+        if (chrome.runtime.lastError) { reject(new Error(chrome.runtime.lastError.message)); return; }
         const notes = Object.entries(items)
           .filter(([k]) => k.startsWith(ChromeStorageDataSource.PREFIX))
           .map(([, v]) => v as Note);
