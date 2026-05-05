@@ -172,8 +172,16 @@ export abstract class AbstractScraper {
     this.log.debug('MutationObserver attached');
 
     const observer = new MutationObserver(() => {
+      if (!chrome.runtime?.id) {
+        observer.disconnect();
+        return;
+      }
       if (debounceTimer) clearTimeout(debounceTimer);
       debounceTimer = setTimeout(() => {
+        if (!chrome.runtime?.id) {
+          observer.disconnect();
+          return;
+        }
         this.log.debug('DOM change detected, re-processing page');
         this.processPage().catch(err => this.log.error('processPage failed after DOM change', err));
       }, 300);
