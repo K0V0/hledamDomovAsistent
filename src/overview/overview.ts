@@ -7,7 +7,7 @@ import type { NoteColor } from '../domain/Note';
 
 const COLOR_SORT_ORDER: NoteColor[] = ['green', 'blue', 'orange', 'red', 'gray', 'black'];
 
-type SortKey = 'color' | 'title' | 'price' | 'platform' | 'workflowStep' | 'createdAt';
+type SortKey = 'color' | 'title' | 'price' | 'platform' | 'workflowStep' | 'createdAt' | 'distanceAirKm' | 'distanceRoadM' | 'durationRoadS';
 
 const SORT_KEY_STORAGE = 'hda-overview-sort-key';
 const SORT_DIR_STORAGE = 'hda-overview-sort-dir';
@@ -181,9 +181,9 @@ function comparator(): (a: Note, b: Note) => number {
       const ai = COLOR_SORT_ORDER.indexOf(a.color ?? DEFAULT_COLOR);
       const bi = COLOR_SORT_ORDER.indexOf(b.color ?? DEFAULT_COLOR);
       cmp = ai - bi;
-    } else if (sortKey === 'price') {
-      const ap = a.price;
-      const bp = b.price;
+    } else if (sortKey === 'price' || sortKey === 'distanceAirKm' || sortKey === 'distanceRoadM' || sortKey === 'durationRoadS') {
+      const ap = a[sortKey];
+      const bp = b[sortKey];
       if (ap == null && bp == null) cmp = 0;
       else if (ap == null) cmp = 1;
       else if (bp == null) cmp = -1;
