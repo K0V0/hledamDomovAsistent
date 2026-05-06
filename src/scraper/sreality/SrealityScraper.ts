@@ -62,10 +62,16 @@ export class SrealityScraper extends AbstractScraper {
   }
 
   override async getGpsFromDetailPage(): Promise<GpsCoordinates | null> {
-    // Try JSON-LD structured data (schema.org/RealEstateListing or Place)
-    for (const script of document.querySelectorAll<HTMLScriptElement>('script[type="application/ld+json"]')) {
+    for (const script of Array.from(document.querySelectorAll<HTMLScriptElement>('script[type="application/ld+json"]'))) {
       try {
         const data = JSON.parse(script.textContent ?? '') as Record<string, unknown>;
+
+        // Sreality embeds lat/lng directly at the top level of a custom JSON-LD blob
+        if (typeof data['latitude'] === 'number' && typeof data['longitude'] === 'number') {
+          return { lat: data['latitude'] as number, lng: data['longitude'] as number };
+        }
+
+        // schema.org/RealEstateListing or Place — geo nested object
         const geo = (data['geo'] ?? (data['location'] as Record<string, unknown> | undefined)?.['geo']) as Record<string, unknown> | undefined;
         if (typeof geo?.['latitude'] === 'number' && typeof geo?.['longitude'] === 'number') {
           return { lat: geo['latitude'] as number, lng: geo['longitude'] as number };

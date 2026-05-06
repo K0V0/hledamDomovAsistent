@@ -95,10 +95,12 @@ export class NoteWidget {
 
   // ── Detail view — editable ────────────────────────────────────────────────
 
-  private createDetailElement(existing: Note | null, userSteps: WorkflowStep[]): HTMLElement {
+  private createDetailElement(initialExisting: Note | null, userSteps: WorkflowStep[]): HTMLElement {
     const allSteps = buildFullWorkflow(userSteps);
+    let existing = initialExisting;
     let activeColor: NoteColor = existing?.color ?? DEFAULT_COLOR;
     let activeWorkflowStepIds: string[] = existing?.workflowStepIds ?? [];
+    let distancesScheduled = false;
 
     const root = document.createElement('div');
     root.className = 'hda-widget';
@@ -122,14 +124,23 @@ export class NoteWidget {
     const status = document.createElement('span');
     status.className = 'hda-widget__status';
 
+    const doSave = (): void => {
+      this.persistNote(itemsContainer, status, existing, activeColor, activeWorkflowStepIds, distancesScheduled)
+        .then(result => {
+          existing = result.note;
+          distancesScheduled = result.distancesScheduled;
+        })
+        .catch(() => {
+          status.textContent = '⚠ Chyba uložení';
+          setTimeout(() => (status.textContent = ''), 2500);
+        });
+    };
+
     let saveTimer: ReturnType<typeof setTimeout> | null = null;
     const scheduleSave = () => {
       status.textContent = 'Saving...';
       if (saveTimer) clearTimeout(saveTimer);
-      saveTimer = setTimeout(
-        () => this.persistNote(itemsContainer, status, existing, activeColor, activeWorkflowStepIds).catch(() => undefined),
-        800,
-      );
+      saveTimer = setTimeout(doSave, 800);
     };
 
     const addRow = (group: HTMLElement, type: NoteItemType, text: string, focus = false) => {
@@ -153,7 +164,7 @@ export class NoteWidget {
       removeBtn.textContent = '×';
       removeBtn.addEventListener('click', () => {
         row.remove();
-        this.persistNote(itemsContainer, status, existing, activeColor, activeWorkflowStepIds).catch(() => undefined);
+        doSave();
       });
 
       row.append(icon, ta, removeBtn);
@@ -168,12 +179,12 @@ export class NoteWidget {
 
     const workflowSection = this.createWorkflowSection(allSteps, activeWorkflowStepIds, stepIds => {
       activeWorkflowStepIds = stepIds;
-      this.persistNote(itemsContainer, status, existing, activeColor, activeWorkflowStepIds).catch(() => undefined);
+      doSave();
     });
 
     const colorRow = this.createColorRow(activeColor, color => {
       activeColor = color;
-      this.persistNote(itemsContainer, status, existing, activeColor, activeWorkflowStepIds).catch(() => undefined);
+      doSave();
     });
 
     const actions = document.createElement('div');
@@ -298,7 +309,8 @@ export class NoteWidget {
     existing: Note | null,
     color: NoteColor,
     workflowStepIds: string[],
-  ): Promise<void> {
+    distancesScheduled: boolean,
+  ): Promise<{ note: Note; distancesScheduled: boolean }> {
     const items = this.collectItems(itemsContainer);
     const now = Date.now();
     const gps = this.scrapedGps ?? existing?.gps;
@@ -321,19 +333,22 @@ export class NoteWidget {
 
     await this.repository.save(note);
 
-    // Recalculate distances only if GPS is available and distances aren't cached yet
-    // (or the GPS point changed from what was previously stored)
     const gpsChanged = gps && (
       existing?.gps?.lat !== gps.lat || existing?.gps?.lng !== gps.lng
     );
     const distancesMissing = gps && existing?.distanceRoadM == null;
 
-    if (gps && (gpsChanged || distancesMissing)) {
+    // calculateAndSaveDistances is called at most once per widget session to
+    // avoid stacking concurrent OSRM requests caused by the stale `existing`
+    // closure always reporting distancesMissing = true.
+    if (gps && (gpsChanged || distancesMissing) && !distancesScheduled) {
+      distancesScheduled = true;
       this.calculateAndSaveDistances(note, gps).catch(() => undefined);
     }
 
     status.textContent = 'Saved';
     setTimeout(() => (status.textContent = ''), 1500);
+    return { note, distancesScheduled };
   }
 
   private async calculateAndSaveDistances(note: Note, gps: GpsCoordinates): Promise<void> {
