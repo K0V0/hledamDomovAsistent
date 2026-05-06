@@ -9,10 +9,13 @@ const COLOR_SORT_ORDER: NoteColor[] = ['green', 'blue', 'orange', 'red', 'gray',
 
 type SortKey = 'color' | 'title' | 'price' | 'platform' | 'workflowStep' | 'createdAt';
 
+const SORT_KEY_STORAGE = 'hda-overview-sort-key';
+const SORT_DIR_STORAGE = 'hda-overview-sort-dir';
+
 let notes: Note[] = [];
 let allWorkflowSteps: WorkflowStep[] = [];
-let sortKey: SortKey = 'createdAt';
-let sortDir: 'asc' | 'desc' = 'desc';
+let sortKey: SortKey = (localStorage.getItem(SORT_KEY_STORAGE) as SortKey | null) ?? 'createdAt';
+let sortDir: 'asc' | 'desc' = (localStorage.getItem(SORT_DIR_STORAGE) as 'asc' | 'desc' | null) ?? 'desc';
 
 async function init(): Promise<void> {
   const [loadedNotes, userSteps] = await Promise.all([
@@ -269,6 +272,8 @@ document.querySelectorAll<HTMLElement>('[data-sort]').forEach(th => {
       sortKey = key;
       sortDir = 'asc';
     }
+    localStorage.setItem(SORT_KEY_STORAGE, sortKey);
+    localStorage.setItem(SORT_DIR_STORAGE, sortDir);
     render();
   });
 });

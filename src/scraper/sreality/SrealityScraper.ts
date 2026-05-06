@@ -52,7 +52,9 @@ export class SrealityScraper extends AbstractScraper {
   protected override getPriceFromDetailPage(): number | null {
     const raw = document
         .querySelector<HTMLElement>('p.css-1b1ajfd')?.textContent;
-    return this.parsePrice(raw);
+    // Strip anything from the first '(' onward to ignore "per m²" suffix
+    const mainPrice = raw?.replace(/\(.*$/s, '');
+    return this.parsePrice(mainPrice);
   }
 
   override injectNoteAtTheBeginningOfContainer(): boolean {
